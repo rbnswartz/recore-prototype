@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "recore", "recore\recore.csproj", "{26F810DA-8653-4027-9015-AB657F73E069}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "recore.db", "recore.db\recore.db.csproj", "{042A968E-C338-44F6-BE1B-3EDE057798D8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{26F810DA-8653-4027-9015-AB657F73E069}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26F810DA-8653-4027-9015-AB657F73E069}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26F810DA-8653-4027-9015-AB657F73E069}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26F810DA-8653-4027-9015-AB657F73E069}.Release|Any CPU.Build.0 = Release|Any CPU
+		{042A968E-C338-44F6-BE1B-3EDE057798D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{042A968E-C338-44F6-BE1B-3EDE057798D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{042A968E-C338-44F6-BE1B-3EDE057798D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{042A968E-C338-44F6-BE1B-3EDE057798D8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
