@@ -149,6 +149,10 @@ namespace recore.db
             NpgsqlCommand selectCommand = new NpgsqlCommand(selectSQL, this.connection);
             selectCommand.Parameters.Add(CreateParameter("id", id));
             var reader = selectCommand.ExecuteReader();
+            if (!reader.HasRows)
+            {
+                return null;
+            }
             reader.Read();
             Record output = new Record();
             foreach (string field in columns)
