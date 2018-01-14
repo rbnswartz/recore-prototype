@@ -5,7 +5,7 @@ namespace recore.db.FieldTypes
     public interface IFieldType
     {
         string ToCreate();
-        string GetFieldName();
-        Type GetFieldType();
+        string Name { get; set; }
+        Type FieldType { get; }
     }
 }

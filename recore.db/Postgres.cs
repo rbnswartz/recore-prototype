@@ -173,21 +173,20 @@ namespace recore.db
         private NpgsqlParameter CreateParameter(string field, object input)
         {
             DbType type = new DbType();
-            if (input is int)
+            switch (input)
             {
-                type = DbType.Int16;
-            }
-            else if (input is string)
-            {
-                type = DbType.String;
-            }
-            else if (input is Guid)
-            {
-                type = DbType.Guid;
-            }
-            else if (input is DateTime)
-            {
-                type = DbType.DateTime;
+                case int _:
+                    type = DbType.Int16;
+                    break;
+                case string _:
+                    type = DbType.String;
+                    break;
+                case Guid _:
+                    type = DbType.Guid;
+                    break;
+                case DateTime _:
+                    type = DbType.DateTime;
+                    break;
             }
             NpgsqlParameter parameter = new NpgsqlParameter(field, type);
             parameter.Value = input;

@@ -4,7 +4,6 @@ namespace recore.db.FieldTypes
 {
     public class DateTimeField : IFieldType
     {
-        public string Name;
         public bool Nullable;
         public bool IncludeTimeZone;
         public string ToCreate()
@@ -16,10 +15,8 @@ namespace recore.db.FieldTypes
         {
             return Name;
         }
-
-        public Type GetFieldType()
-        {
-            return typeof(DateTime);
-        }
+        
+        public Type FieldType => typeof(DateTime);
+        public string Name { get; set; }
     }
 }
