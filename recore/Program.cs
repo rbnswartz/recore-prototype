@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using recore.db;
 using recore.db.FieldTypes;
+using recore.db.Commands;
 
 namespace recore
 {
@@ -28,9 +29,18 @@ namespace recore
                     ["number"] = 123
                 }
             };
-            Guid created = data.CreateRecord(newLog);
-            Console.WriteLine(created);
-            Record createdRecord = data.RetrieveRecord("log", created, new List<string>() {"createdon", "logid"});
+            
+            DataService service = new DataService();
+            service.data = data;
+            CreateRecordCommand com = new CreateRecordCommand()
+            {
+                Target = newLog,
+            };
+
+            CreateRecordResult result = (CreateRecordResult)service.Execute(com);
+            
+            Console.WriteLine(result.RecordId);
+            Record createdRecord = data.RetrieveRecord("log", result.RecordId, new List<string>() {"createdon", "logid"});
             foreach (var item in createdRecord.Data)
             {
                 Console.WriteLine($"{item.Key}:{item.Value}");
@@ -39,8 +49,10 @@ namespace recore
             {
                 data.DeleteRecordType(type.RecordTypeId);
             }
+            
+            
+            
             Console.WriteLine("All done");
-            Console.ReadLine();
         }
     }
 }
