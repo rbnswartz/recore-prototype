@@ -9,6 +9,7 @@ namespace recore.db
         void Initialize();
         List<RecordType> GetAllTypes();
         RecordType GetRecordType(Guid typeId);
+        RecordType GetRecordType(string typeName);
         void CreateRecordType(RecordType type);
         void DeleteRecordType(Guid typeId);
         Guid CreateRecord(Record record);

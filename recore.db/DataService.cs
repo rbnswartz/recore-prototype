@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using recore.db.Commands;
 
 namespace recore.db
@@ -12,7 +14,17 @@ namespace recore.db
             {
                 case CreateRecordCommand _:
                 {
-                    Guid result = this.data.CreateRecord(((CreateRecordCommand) command).Target);
+                    CreateRecordCommand createCommand = (CreateRecordCommand) command;
+                    RecordType type = data.GetRecordType(createCommand.Target.Type);
+                    Guid result = this.data.CreateRecord(createCommand.Target);
+                    List<string> sourceFieldNames = type.Fields.Select(t => t.Name).ToList();
+                    foreach (string field in createCommand.Target.Data.Keys)
+                    {
+                        if (!sourceFieldNames.Contains(field))
+                        {
+                            throw new MissingFieldException($"Record with type {createCommand.Target.Type} doesn't have the column {field}");
+                        }
+                    }
                     return new CreateRecordResult() { RecordId = result};
                 }
                 default:
