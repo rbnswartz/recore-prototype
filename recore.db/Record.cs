@@ -34,8 +34,6 @@ namespace recore.db
                 {
                     this.Data.Add(key, value);
                 }
-
-                throw new KeyNotFoundException($"Field {key} doesn't exist in this record");
             }
         }
     }

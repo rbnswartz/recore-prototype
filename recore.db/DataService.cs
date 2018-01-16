@@ -16,7 +16,6 @@ namespace recore.db
                 {
                     CreateRecordCommand createCommand = (CreateRecordCommand) command;
                     RecordType type = data.GetRecordType(createCommand.Target.Type);
-                    Guid result = this.data.CreateRecord(createCommand.Target);
                     List<string> sourceFieldNames = type.Fields.Select(t => t.Name).ToList();
                     foreach (string field in createCommand.Target.Data.Keys)
                     {
@@ -25,6 +24,10 @@ namespace recore.db
                             throw new MissingFieldException($"Record with type {createCommand.Target.Type} doesn't have the column {field}");
                         }
                     }
+
+                    createCommand.Target["createdon"] = DateTime.Now;
+                    createCommand.Target["modifiedon"] = DateTime.Now;
+                    Guid result = this.data.CreateRecord(createCommand.Target);
                     return new CreateRecordResult() { RecordId = result};
                 }
                 default:

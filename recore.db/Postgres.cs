@@ -126,8 +126,6 @@ namespace recore.db
         {
             Guid createdGuid = Guid.NewGuid();
             record.Data.Add($"{record.Type}Id", createdGuid);
-            record.Data.Add("CreatedOn", DateTime.Now);
-            record.Data.Add("ModifiedOn", DateTime.Now);
             string insertSql =
                 $"insert into {record.Type} ({string.Join(",", record.Data.Keys)}) values ({string.Join(",", record.Data.Keys.Select(k => $"@{k}"))})";
             NpgsqlCommand insertCommand =
