@@ -4,7 +4,7 @@ namespace recore.db.FieldTypes
 {
     public class DateField : IFieldType
     {
-        public bool Nullable;
+        public Boolean Nullable { get; set; }
         
         public string ToCreate()
         {

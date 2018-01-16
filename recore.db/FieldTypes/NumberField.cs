@@ -6,7 +6,7 @@ namespace recore.db.FieldTypes
     {
         public int Max;
         public int Min;
-        public bool Nullable;
+        public Boolean Nullable { get; set; }
         public string ToCreate()
         {
             return $"{Name} integer" + (!Nullable ? "NOT NULL" : "") ;

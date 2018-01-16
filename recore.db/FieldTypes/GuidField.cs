@@ -4,7 +4,7 @@ namespace recore.db.FieldTypes
 {
     public class GuidField: IFieldType
     {
-        public Boolean Nullable;
+        public Boolean Nullable { get; set; }
         
         public string ToCreate()
         {

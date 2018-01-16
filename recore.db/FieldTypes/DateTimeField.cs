@@ -4,7 +4,7 @@ namespace recore.db.FieldTypes
 {
     public class DateTimeField : IFieldType
     {
-        public bool Nullable;
+        public Boolean Nullable { get; set; }
         public bool IncludeTimeZone;
         public string ToCreate()
         {

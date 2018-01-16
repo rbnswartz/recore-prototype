@@ -11,5 +11,6 @@ namespace recore.db.FieldTypes
         
         public Type FieldType => typeof(Guid);
         public string Name { get; set; }
+        public Boolean Nullable { get; set; }
     }
 }
