@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using recore.db.FieldTypes;
 
 namespace recore.db
@@ -29,5 +30,7 @@ namespace recore.db
         public Guid RecordTypeId;
         public string TableName;
         public List<IFieldType> Fields;
+
+        public List<string> FieldNames => Fields.Select(f => f.Name).ToList();
     }
 }
