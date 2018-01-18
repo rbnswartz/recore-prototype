@@ -94,10 +94,6 @@ namespace recore.db
 
         public void CreateRecordType(RecordType type)
         {
-            // Add needed columns to the type
-            type.Fields.Add(new PrimaryField() {Name = type.TableName + "Id"});
-            type.Fields.Add(new DateTimeField() {Name = "createdon", Nullable = false});
-            type.Fields.Add(new DateTimeField() {Name = "modifiedon", Nullable = false});
             // Unsafe but left that way from prototype means
             NpgsqlParameter RecordTypeId = new NpgsqlParameter("RecordTypeId", DbType.Guid) {Value = type.RecordTypeId};
             NpgsqlParameter Name = new NpgsqlParameter("Name", DbType.String) {Value = type.Name};

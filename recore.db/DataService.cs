@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using recore.db.Commands;
+using recore.db.FieldTypes;
 
 namespace recore.db
 {
@@ -51,6 +52,16 @@ namespace recore.db
                     }
                     
                     return new RetrieveRecordResult() { Result = this.data.RetrieveRecord(retrieveCommand.Type, retrieveCommand.Id, fieldsToGet)};
+                }
+                case CreateRecordTypeCommand _:
+                {
+                    CreateRecordTypeCommand createCommand = (CreateRecordTypeCommand) command;
+                            
+                    createCommand.Target.Fields.Add(new PrimaryField() {Name = createCommand.Target.TableName + "Id"});
+                    createCommand.Target.Fields.Add(new DateTimeField() {Name = "createdon", Nullable = false});
+                    createCommand.Target.Fields.Add(new DateTimeField() {Name = "modifiedon", Nullable = false});
+                    this.data.CreateRecordType(createCommand.Target);
+                    return new CreateRecordTypeResult();
                 }
                 default:
                 {

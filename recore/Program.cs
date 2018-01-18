@@ -11,6 +11,8 @@ namespace recore
         static void Main(string[] args)
         {
             IDataSource data = new Postgres("Host=localhost; Port=5432; User Id=reuben; Password=password; Database=recore;");
+            DataService service = new DataService();
+            service.data = data;
             Console.WriteLine(data.CheckInitialized());
             if (!data.CheckInitialized())
             {
@@ -19,7 +21,7 @@ namespace recore
             RecordType newType = new RecordType("Log", "log");
             newType.Fields.Add(new TextField(){Name = "name", Length = 50, Nullable = true});
             newType.Fields.Add(new NumberField(){Name = "number", Nullable = true});
-            data.CreateRecordType(newType);
+            service.Execute(new CreateRecordTypeCommand() {Target = newType});
             Record newLog = new Record()
             {
                 Type = "log",
@@ -30,8 +32,6 @@ namespace recore
                 }
             };
             
-            DataService service = new DataService();
-            service.data = data;
             CreateRecordCommand com = new CreateRecordCommand()
             {
                 Target = newLog,
