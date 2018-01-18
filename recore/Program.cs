@@ -40,7 +40,7 @@ namespace recore
             CreateRecordResult result = (CreateRecordResult)service.Execute(com);
             
             Console.WriteLine(result.RecordId);
-            Record createdRecord = data.RetrieveRecord("log", result.RecordId, new List<string>() {"createdon", "logid"});
+            Record createdRecord = ((RetrieveRecordResult)service.Execute(new RetrieveRecordCommand(){AllFields = true, Id = result.RecordId, Type = "log"})).Result;
             foreach (var item in createdRecord.Data)
             {
                 Console.WriteLine($"{item.Key}:{item.Value}");
