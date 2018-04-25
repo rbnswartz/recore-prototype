@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using recore.db;
 using recore.db.Commands;
 
@@ -10,6 +11,10 @@ namespace recore.web.Controllers
 {
     public class DataController : Controller
     {
+        private string connectionString;
+        public DataController(IConfiguration config){
+            connectionString = config.GetValue<string>("recore:connectionstring");
+        }
         public IActionResult Index()
         {
             return View();
@@ -19,7 +24,7 @@ namespace recore.web.Controllers
         [Route("data/{recordType}/")]
         public List<Record> GetAll(string recordType, List<string> columns)
         {
-            IDataSource data = new Postgres("Host=localhost; Port=5432; User Id=reuben; Password=password; Database=recore;");
+            IDataSource data = new Postgres(connectionString);
             DataService service = new DataService();
             service.data = data;
             if (columns.Count == 0)
@@ -45,7 +50,7 @@ namespace recore.web.Controllers
         [Route("data/{recordType}/{id}")]
         public Record Get(string recordType, Guid id, List<string> columns)
         {
-            IDataSource data = new Postgres("Host=localhost; Port=5432; User Id=reuben; Password=password; Database=recore;");
+            IDataSource data = new Postgres(connectionString);
             DataService service = new DataService();
             service.data = data;
             if (columns.Count == 0)
@@ -73,7 +78,7 @@ namespace recore.web.Controllers
         [Route("data/{recordType}/")]
         public Guid Post(string recordType, [FromBody] Record record)
         {
-            IDataSource data = new Postgres("Host=localhost; Port=5432; User Id=reuben; Password=password; Database=recore;");
+            IDataSource data = new Postgres(connectionString);
             DataService service = new DataService();
             service.data = data;
             record.Type = recordType;
@@ -89,7 +94,7 @@ namespace recore.web.Controllers
         [Route("data/{recordType}/{id}")]
         public void Delete(string recordType, Guid id)
         {
-            IDataSource data = new Postgres("Host=localhost; Port=5432; User Id=reuben; Password=password; Database=recore;");
+            IDataSource data = new Postgres(connectionString);
             DataService service = new DataService();
             service.data = data;
             DeleteRecordCommand command = new DeleteRecordCommand()

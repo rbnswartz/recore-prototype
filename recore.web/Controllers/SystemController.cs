@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using recore.db;
 using recore.db.Commands;
 using recore.db.FieldTypes;
@@ -11,6 +12,10 @@ namespace recore.web.Controllers
 {
     public class SystemController : Controller
     {
+        private string connectionString;
+        public SystemController(IConfiguration config){
+            connectionString = config.GetValue<string>("recore:connectionstring");
+        }
         public IActionResult Index()
         {
             return View();
@@ -22,7 +27,7 @@ namespace recore.web.Controllers
         {
             DataService service = new DataService()
             {
-                data = new Postgres("Host=localhost; Port=5432; User Id=reuben; Password=password; Database=recore;"),
+                data = new Postgres(connectionString),
             };
             if (!service.data.CheckInitialized())
             {
