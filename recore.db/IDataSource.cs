@@ -14,5 +14,6 @@ namespace recore.db
         void DeleteRecordType(Guid typeId);
         Guid CreateRecord(Record record);
         Record RetrieveRecord(string typeName, Guid id, List<string> columns);
+        List<Record> RetrieveAllRecords(string typeName, List<string> columns);
     }
 }

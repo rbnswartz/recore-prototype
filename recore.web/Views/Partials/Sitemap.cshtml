@@ -1,0 +1,21 @@
+﻿@model List<SitemapItem>
+<nav class="sidebar-nav">
+    <ul class="nav">
+    @foreach(var item in Model)
+    {
+        switch (item.Type)
+        {
+            case "label":
+                <li class="nav-title">@item.Label</li>
+                break;
+            case "link":
+                <li class="nav-item">
+                    <a class="nav-link" href="@item.Url">
+                        <i class="nav-icon icon-speedometer"></i> @item.Label
+                    </a>
+                </li>
+                break;
+        }
+    }
+    </ul>
+</nav>

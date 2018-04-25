@@ -4,6 +4,16 @@ namespace recore.db.FieldTypes
 {
     public class TextField : IFieldType
     {
+        public TextField(string name, int length, bool nullable)
+        {
+            this.Name = name;
+            this.Length = length;
+            this.Nullable = nullable;
+        }
+        public TextField()
+        {
+
+        }
         public int Length;
         public Boolean Nullable { get; set; }
         public string ToCreate()

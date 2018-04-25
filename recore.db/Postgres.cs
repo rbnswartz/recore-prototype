@@ -78,6 +78,10 @@ namespace recore.db
             NpgsqlCommand command = new NpgsqlCommand("select RecordTypeId, Name, TableName, Columns from recordtype where TableName = @name", this.connection);
             command.Parameters.Add(new NpgsqlParameter("name", DbType.String) {Value = typeName});
             var reader = command.ExecuteReader();
+            if (!reader.HasRows)
+            {
+                return null;
+            }
             reader.Read();
             RecordType type = this.ConvertDataRowToRecordTypes(reader);
             reader.Close();
@@ -138,21 +142,64 @@ namespace recore.db
         public Record RetrieveRecord(string typeName, Guid id, List<string> columns)
         {
             RecordType type = this.GetRecordType(typeName);
+            columns = EnsureIdColumn(columns, typeName);
             // Insecure. Needs to sanatize column names
             string selectSQL =
                 $"select {(string.Join(",", columns))} from {typeName} where {typeName}Id = @id";
             NpgsqlCommand selectCommand = new NpgsqlCommand(selectSQL, this.connection);
             selectCommand.Parameters.Add(CreateParameter("id", id));
+            using (var reader = selectCommand.ExecuteReader())
+            {
+                if (!reader.HasRows)
+                {
+                    return null;
+                }
+                reader.Read();
+                return ReadToRecord(reader, columns, typeName);
+            }
+        }
+
+        private List<string> EnsureIdColumn(List<string> input, string typeName)
+        {
+            if (!input.Contains(typeName))
+            {
+                input.Add(typeName + "id");
+            }
+            return input;
+        }
+
+        private Record ReadToRecord(NpgsqlDataReader reader, List<string> columns, string typeName)
+        {
+            Record output = new Record();
+            foreach (string field in columns)
+            {
+                if (field == typeName + "id")
+                {
+                    output.Id = (Guid)reader[field];
+                }
+                output.Data.Add(field, reader[field]);
+            }
+            return output;
+        }
+
+        // To be replaced later with actual filters
+        public List<Record> RetrieveAllRecords(string typeName, List<string> columns)
+        {
+            RecordType type = this.GetRecordType(typeName);
+            columns = EnsureIdColumn(columns, typeName);
+            List<Record> output = new List<Record>();
+            // Insecure. Needs to sanatize column names
+            string selectSQL =
+                $"select {(string.Join(",", columns))} from {typeName}";
+            NpgsqlCommand selectCommand = new NpgsqlCommand(selectSQL, this.connection);
             var reader = selectCommand.ExecuteReader();
             if (!reader.HasRows)
             {
                 return null;
             }
-            reader.Read();
-            Record output = new Record();
-            foreach (string field in columns)
+            while (reader.Read())
             {
-                output.Data.Add(field, reader[field]);
+                output.Add(ReadToRecord(reader, columns, typeName));
             }
             reader.Close();
             return output;
@@ -176,6 +223,9 @@ namespace recore.db
             {
                 case int _:
                     type = DbType.Int16;
+                    break;
+                case long _:
+                    type = DbType.Int64;
                     break;
                 case string _:
                     type = DbType.String;

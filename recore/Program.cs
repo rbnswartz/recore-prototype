@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using recore.db;
 using recore.db.FieldTypes;
 using recore.db.Commands;
+using System.Linq;
 
 namespace recore
 {
@@ -18,17 +19,30 @@ namespace recore
             {
                 data.Initialize();
             }
-            RecordType newType = new RecordType("Log", "log");
-            newType.Fields.Add(new TextField(){Name = "name", Length = 50, Nullable = true});
-            newType.Fields.Add(new NumberField(){Name = "number", Nullable = true});
-            service.Execute(new CreateRecordTypeCommand() {Target = newType});
+            RecordType CustomerType = new RecordType("Customer", "customer");
+            CustomerType.Fields.Add(new TextField() { Name = "name", Length = 50});
+            service.Execute(new CreateRecordTypeCommand() { Target = CustomerType });
+            RecordType logType = new RecordType("Log", "log");
+            logType.Fields.Add(new TextField(){Name = "name", Length = 50, Nullable = true});
+            logType.Fields.Add(new NumberField(){Name = "number", Nullable = true});
+            service.Execute(new CreateRecordTypeCommand() {Target = logType});
+            Record firstCustomer = new Record()
+            {
+                Type = "customer",
+                Data = new Dictionary<string, object>()
+                {
+                    ["name"] = "First customer",
+                }
+            };
+            CreateRecordResult createResult = (CreateRecordResult)service.Execute(new CreateRecordCommand() { Target = firstCustomer });
             Record newLog = new Record()
             {
                 Type = "log",
                 Data = new Dictionary<string, object>()
                 {
                     ["name"] = "First ever log!",
-                    ["number"] = 123
+                    ["number"] = 123,
+                    ["customer"] = createResult.RecordId,
                 }
             };
             
@@ -45,7 +59,9 @@ namespace recore
             {
                 Console.WriteLine($"{item.Key}:{item.Value}");
             }
-            foreach (var type in data.GetAllTypes())
+            var allTypes = data.GetAllTypes().ToList();
+            allTypes.Reverse();
+            foreach (var type in allTypes)
             {
                 data.DeleteRecordType(type.RecordTypeId);
             }
@@ -53,6 +69,7 @@ namespace recore
             
             
             Console.WriteLine("All done");
+            Console.ReadLine();
         }
     }
 }

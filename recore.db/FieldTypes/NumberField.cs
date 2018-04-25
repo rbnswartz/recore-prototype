@@ -14,5 +14,6 @@ namespace recore.db.FieldTypes
         
         public Type FieldType => typeof(int);
         public string Name { get; set; }
+        public string Label { get; set; }
     }
 }

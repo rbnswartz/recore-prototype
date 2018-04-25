@@ -63,6 +63,23 @@ namespace recore.db
                     this.data.CreateRecordType(createCommand.Target);
                     return new CreateRecordTypeResult();
                 }
+                case RetrieveAllCommand _:
+                {
+                    RetrieveAllCommand retreiveCommand = (RetrieveAllCommand) command;
+                            
+                    var result = this.data.RetrieveAllRecords(retreiveCommand.RecordType, retreiveCommand.Columns);
+                    return new RetrieveAllResult() { Result = result };
+                }
+                case RetrieveRecordTypeCommand _:
+                {
+                        RetrieveRecordTypeCommand retrievecommand = (RetrieveRecordTypeCommand)command;
+                        var result = this.data.GetRecordType(retrievecommand.RecordType);
+                        return new RetrieveRecordTypeResult() { Type = result };
+                }
+                case DeleteRecordCommand _:
+                    {
+                        return new DeleteRecordResult();
+                    }
                 default:
                 {
                     throw  new Exception("Unknown command");
