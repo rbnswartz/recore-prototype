@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using recore.db;
+using recore.db.Commands;
 using recore.db.FieldTypes;
 
 namespace recore.web.Controllers
@@ -15,6 +16,8 @@ namespace recore.web.Controllers
             return View();
         }
 
+        [HttpGet]
+        [Route("system/init")]
         public bool Init()
         {
             DataService service = new DataService()
@@ -45,6 +48,16 @@ namespace recore.web.Controllers
                     new TextField("contents", 10000, false),
                 }
             };
+            RecordType Log = new RecordType("Log", "log")
+            {
+                Fields = new List<IFieldType>()
+                {
+                    new TextField("text", 100, false),
+                }
+            };
+            service.Execute(new CreateRecordTypeCommand() { Target = Sitemap });
+            service.Execute(new CreateRecordTypeCommand() { Target = View });
+            service.Execute(new CreateRecordTypeCommand() { Target = Log });
             return true;
         }
     }
