@@ -13,6 +13,8 @@ namespace recore.db
         void CreateRecordType(RecordType type);
         void DeleteRecordType(Guid typeId);
         Guid CreateRecord(Record record);
+        void DeleteRecord(string recordType, Guid id);
+        void UpdateRecord(Record record);
         Record RetrieveRecord(string typeName, Guid id, List<string> columns);
         List<Record> RetrieveAllRecords(string typeName, List<string> columns);
     }

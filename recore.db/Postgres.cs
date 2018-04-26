@@ -241,5 +241,28 @@ namespace recore.db
             parameter.Value = input;
             return parameter;
         }
+
+        public void DeleteRecord(string recordType, Guid id)
+        {
+            string deleteSQL =
+                $"delete from {recordType} where id=@id";
+            NpgsqlCommand selectCommand = new NpgsqlCommand(deleteSQL, this.connection);
+            selectCommand.Parameters.Add(CreateParameter("id", id);
+            selectCommand.ExecuteNonQuery();
+        }
+
+        public void UpdateRecord(Record record)
+        {
+            List<string> updates = record.Data.Keys.Select(k => $"{k}=@{k}").ToList();
+            string insertSql =
+                $"update {record.Type} {string.Join(",", updates)}";
+            NpgsqlCommand updateCommand =
+                new NpgsqlCommand(insertSql, this.connection);
+            foreach (var item in record.Data)
+            {
+                updateCommand.Parameters.Add(this.CreateParameter(item.Key, item.Value));
+            }
+            updateCommand.ExecuteNonQuery();
+        }
     }
 }
