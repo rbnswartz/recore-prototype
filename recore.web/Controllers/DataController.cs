@@ -104,5 +104,19 @@ namespace recore.web.Controllers
             };
             DeleteRecordResult result = (DeleteRecordResult)service.Execute(command);
         }
+
+        [HttpPatch]
+        [Route("data/{recordType}/{id}")]
+        public void Update(string recordType, Guid id, [FromBody] Record record)
+        {
+            IDataSource data = new Postgres(connectionString);
+            DataService service = new DataService();
+            service.data = data;
+            UpdateRecordCommand command = new UpdateRecordCommand()
+            {
+                Target = record
+            };
+            DeleteRecordResult result = (DeleteRecordResult)service.Execute(command);
+        }
     }
 }

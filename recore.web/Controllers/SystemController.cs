@@ -40,7 +40,7 @@ namespace recore.web.Controllers
                 {
                     new TextField("label", 100, false),
                     new TextField("type", 20, false),
-                    new TextField("url", 20, false),
+                    new TextField("url", 100, false),
                     new TextField("recordtype", 100, false),
                 }
             };
