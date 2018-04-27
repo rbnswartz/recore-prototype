@@ -78,6 +78,14 @@ namespace recore.db
                 }
                 case DeleteRecordCommand _:
                     {
+                        DeleteRecordCommand deleteCommand = (DeleteRecordCommand)command;
+                        this.data.DeleteRecord(deleteCommand.Type, deleteCommand.Id);
+                        return new DeleteRecordResult();
+                    }
+                case UpdateRecordCommand _:
+                    {
+                        UpdateRecordCommand updateCommand = (UpdateRecordCommand)command;
+                        this.data.UpdateRecord(updateCommand.Target);
                         return new DeleteRecordResult();
                     }
                 default:
