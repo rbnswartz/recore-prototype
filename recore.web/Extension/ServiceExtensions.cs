@@ -16,6 +16,7 @@ namespace recore.web.Extension
             RetrieveAllCommand getAll = new RetrieveAllCommand()
             {
                 RecordType = "sitemap",
+                Columns = new List<string>() { "url", "label", "recordtype", "type"},
             };
             RetrieveAllResult result = (RetrieveAllResult)service.Execute(getAll);
             foreach(var i in result.Result)

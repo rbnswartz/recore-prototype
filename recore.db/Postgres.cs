@@ -245,7 +245,7 @@ namespace recore.db
         public void DeleteRecord(string recordType, Guid id)
         {
             string deleteSQL =
-                $"delete from {recordType} where id=@id";
+                $"delete from {recordType} where {recordType}id=@id";
             NpgsqlCommand selectCommand = new NpgsqlCommand(deleteSQL, this.connection);
             selectCommand.Parameters.Add(CreateParameter("id", id));
             selectCommand.ExecuteNonQuery();

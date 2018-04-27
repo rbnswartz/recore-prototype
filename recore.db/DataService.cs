@@ -66,8 +66,11 @@ namespace recore.db
                 case RetrieveAllCommand _:
                 {
                     RetrieveAllCommand retreiveCommand = (RetrieveAllCommand) command;
-                            
                     var result = this.data.RetrieveAllRecords(retreiveCommand.RecordType, retreiveCommand.Columns);
+                    if (result == null)
+                        {
+                            result = new List<Record>();
+                        }
                     return new RetrieveAllResult() { Result = result };
                 }
                 case RetrieveRecordTypeCommand _:

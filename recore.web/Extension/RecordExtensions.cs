@@ -12,7 +12,7 @@ namespace recore.web.Extension
         {
             if (input.Data.ContainsKey(field))
             {
-                return field;
+                return input.Data[field];
             }
             return null;
         }
