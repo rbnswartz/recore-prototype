@@ -255,7 +255,7 @@ namespace recore.db
         {
             List<string> updates = record.Data.Keys.Select(k => $"{k}=@{k}").ToList();
             string insertSql =
-                $"update {record.Type} {string.Join(",", updates)}";
+                $"update {record.Type} set {string.Join(",", updates)}";
             NpgsqlCommand updateCommand =
                 new NpgsqlCommand(insertSql, this.connection);
             foreach (var item in record.Data)

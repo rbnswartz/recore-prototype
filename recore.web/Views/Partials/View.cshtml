@@ -1,0 +1,33 @@
+@model RecoreView;
+<table class = "table" id="view">
+    <thead>
+        <tr>
+        @foreach(var item in Model.Columns){
+            <th>@item.Data</th>
+        }
+        </tr>
+    </thead>
+<tbody>
+</tbody>
+</table>
+<script>
+    var columns = {
+        //@string.Join(",", Model.Columns.Keys)
+    };
+    var target = document.querySelector("tbody");
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function(){
+    if (request.readyState >= 4){
+        var result = JSON.parse(request.responseText);
+        result.foreach(function(row)){
+            var newRow = document.createElement("tr");
+            item.Data.foreach(function(column){
+                var newColumn = document.createElement("td");
+                newColumn.innerText = row[column];
+                newRow.appendChild(newColumn);
+            })
+            target.appendChild(newRow);
+        }
+    }
+    };
+</script>

@@ -1,5 +1,11 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+<div class="card">
+    <div class = "card-header"><h5>Test view</h5></div>
+    <div class="card-block">
+        @Html.Partial("../Partials/View", ViewData["View"] )
+    </div>
+</div>
 
 

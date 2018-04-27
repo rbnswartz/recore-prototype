@@ -112,6 +112,8 @@ namespace recore.web.Controllers
             IDataSource data = new Postgres(connectionString);
             DataService service = new DataService();
             service.data = data;
+            record.Id = id;
+            record.Type = recordType;
             UpdateRecordCommand command = new UpdateRecordCommand()
             {
                 Target = record
