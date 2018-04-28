@@ -25,5 +25,17 @@ namespace recore.web.Extension
             }
             return output;
         }
+
+        public static RecoreView GetView(this DataService service, Guid viewId)
+        {
+            RetrieveRecordCommand getAll = new RetrieveRecordCommand()
+            {
+                Type = "view",
+                AllFields = true,
+                Id = viewId
+            };
+            RetrieveRecordResult result = (RetrieveRecordResult)service.Execute(getAll);
+            return new RecoreView(result.Result);
+        }
     }
 }

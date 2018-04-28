@@ -24,9 +24,10 @@ namespace recore.web.Controllers
                 data = new Postgres(connectionString),
             };
             ViewData["sitemap"] = service.GetSiteMap();
-            ViewData["view"] = new RecoreView("type"){
+            ViewData["view"] = new RecoreView("sitemap"){
                 Columns = new Dictionary<string,string>() {
-                    { "hello", "world"}
+                    { "label", "Label"},
+                    { "url", "URL"},
                 }
             };
             return View();

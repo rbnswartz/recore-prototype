@@ -3,31 +3,33 @@
     <thead>
         <tr>
         @foreach(var item in Model.Columns){
-            <th>@item.Data</th>
+            <th>@item.Value</th>
         }
         </tr>
     </thead>
 <tbody>
 </tbody>
 </table>
-<script>
-    var columns = {
-        //@string.Join(",", Model.Columns.Keys)
-    };
+<script type="text/javascript">
+    var columns = [
+        @Html.Raw(string.Join(",", Model.Columns.Keys.Select(k => $"'{k}'")))
+    ];
     var target = document.querySelector("tbody");
     var request = new XMLHttpRequest();
+    request.open("GET", "/data/@Model.recordType/")
     request.onreadystatechange = function(){
-    if (request.readyState >= 4){
-        var result = JSON.parse(request.responseText);
-        result.foreach(function(row)){
-            var newRow = document.createElement("tr");
-            item.Data.foreach(function(column){
-                var newColumn = document.createElement("td");
-                newColumn.innerText = row[column];
-                newRow.appendChild(newColumn);
-            })
-            target.appendChild(newRow);
+        if (request.readyState >= 4){
+            var result = JSON.parse(request.responseText);
+            result.forEach(function (row) {
+                var newRow = document.createElement("tr");
+                columns.forEach(function (column) {
+                    var newColumn = document.createElement("td");
+                    newColumn.innerText = row.data[column];
+                    newRow.appendChild(newColumn);
+                });
+                target.appendChild(newRow);
+            });
         }
-    }
     };
+    request.send();
 </script>
