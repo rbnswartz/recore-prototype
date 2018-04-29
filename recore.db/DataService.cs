@@ -95,6 +95,11 @@ namespace recore.db
                         this.data.UpdateRecord(updateCommand.Target);
                         return new DeleteRecordResult();
                     }
+                case RetrieveAllRecordTypesCommand _:
+                    {
+                        var allTypes = this.data.RetrieveAllRecordTypes();
+                        return new RetrieveAllRecordTypesResult() { RecordTypes = allTypes };
+                    }
                 default:
                 {
                     throw  new Exception("Unknown command");

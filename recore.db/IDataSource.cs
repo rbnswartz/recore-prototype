@@ -17,5 +17,6 @@ namespace recore.db
         void UpdateRecord(Record record);
         Record RetrieveRecord(string typeName, Guid id, List<string> columns);
         List<Record> RetrieveAllRecords(string typeName, List<string> columns);
+        List<RecordType> RetrieveAllRecordTypes();
     }
 }

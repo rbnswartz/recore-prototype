@@ -264,5 +264,18 @@ namespace recore.db
             }
             updateCommand.ExecuteNonQuery();
         }
+
+        public List<RecordType> RetrieveAllRecordTypes()
+        {
+            List<RecordType> output = new List<RecordType>();
+            string select = "select * from recordtype";
+            NpgsqlCommand command = new NpgsqlCommand(select, this.connection);
+            NpgsqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                output.Add(this.ConvertDataRowToRecordTypes(reader));
+            }
+            return output;
+        }
     }
 }
