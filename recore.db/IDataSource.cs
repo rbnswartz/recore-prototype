@@ -5,6 +5,9 @@ namespace recore.db
 {
     public interface IDataSource
     {
+        void Open();
+        void Close();
+
         bool CheckInitialized();
         void Initialize();
         List<RecordType> GetAllTypes();

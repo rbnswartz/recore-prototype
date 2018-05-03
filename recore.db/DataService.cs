@@ -11,6 +11,8 @@ namespace recore.db
         public IDataSource data;
         public ResultBase Execute(CommandBase command)
         {
+            data.Open();
+            ResultBase output = null;
             switch (command)
             {
                 case CreateRecordCommand _:
@@ -29,7 +31,8 @@ namespace recore.db
                     createCommand.Target["createdon"] = DateTime.Now;
                     createCommand.Target["modifiedon"] = DateTime.Now;
                     Guid result = this.data.CreateRecord(createCommand.Target);
-                    return new CreateRecordResult() { RecordId = result};
+                    output =  new CreateRecordResult() { RecordId = result};
+                    break;
                 }
                 case RetrieveRecordCommand _:
                 {
@@ -51,7 +54,8 @@ namespace recore.db
                         fieldsToGet = retrieveCommand.Fields;
                     }
                     
-                    return new RetrieveRecordResult() { Result = this.data.RetrieveRecord(retrieveCommand.Type, retrieveCommand.Id, fieldsToGet)};
+                    output =  new RetrieveRecordResult() { Result = this.data.RetrieveRecord(retrieveCommand.Type, retrieveCommand.Id, fieldsToGet)};
+                    break;
                 }
                 case CreateRecordTypeCommand _:
                 {
@@ -61,7 +65,8 @@ namespace recore.db
                     createCommand.Target.Fields.Add(new DateTimeField() {Name = "createdon", Nullable = false});
                     createCommand.Target.Fields.Add(new DateTimeField() {Name = "modifiedon", Nullable = false});
                     this.data.CreateRecordType(createCommand.Target);
-                    return new CreateRecordTypeResult();
+                    output =  new CreateRecordTypeResult();
+                    break;
                 }
                 case RetrieveAllCommand _:
                 {
@@ -75,36 +80,43 @@ namespace recore.db
                         {
                             result = new List<Record>();
                         }
-                    return new RetrieveAllResult() { Result = result };
+                    output =  new RetrieveAllResult() { Result = result };
+                    break;
                 }
                 case RetrieveRecordTypeCommand _:
                 {
-                        RetrieveRecordTypeCommand retrievecommand = (RetrieveRecordTypeCommand)command;
-                        var result = this.data.GetRecordType(retrievecommand.RecordType);
-                        return new RetrieveRecordTypeResult() { Type = result };
+                    RetrieveRecordTypeCommand retrievecommand = (RetrieveRecordTypeCommand)command;
+                    var result = this.data.GetRecordType(retrievecommand.RecordType);
+                    output = new RetrieveRecordTypeResult() { Type = result };
+                    break;
                 }
                 case DeleteRecordCommand _:
-                    {
-                        DeleteRecordCommand deleteCommand = (DeleteRecordCommand)command;
-                        this.data.DeleteRecord(deleteCommand.Type, deleteCommand.Id);
-                        return new DeleteRecordResult();
-                    }
+                {
+                    DeleteRecordCommand deleteCommand = (DeleteRecordCommand)command;
+                    this.data.DeleteRecord(deleteCommand.Type, deleteCommand.Id);
+                    output =  new DeleteRecordResult();
+                    break;
+                }
                 case UpdateRecordCommand _:
-                    {
-                        UpdateRecordCommand updateCommand = (UpdateRecordCommand)command;
-                        this.data.UpdateRecord(updateCommand.Target);
-                        return new DeleteRecordResult();
-                    }
+                {
+                    UpdateRecordCommand updateCommand = (UpdateRecordCommand)command;
+                    this.data.UpdateRecord(updateCommand.Target);
+                    output = new DeleteRecordResult();
+                    break;
+                }
                 case RetrieveAllRecordTypesCommand _:
-                    {
-                        var allTypes = this.data.RetrieveAllRecordTypes();
-                        return new RetrieveAllRecordTypesResult() { RecordTypes = allTypes };
-                    }
+                {
+                    var allTypes = this.data.RetrieveAllRecordTypes();
+                    output =  new RetrieveAllRecordTypesResult() { RecordTypes = allTypes };
+                    break;
+                }
                 default:
                 {
                     throw  new Exception("Unknown command");
                 }
             }
+            data.Close();
+            return output;
         }
     }
 }

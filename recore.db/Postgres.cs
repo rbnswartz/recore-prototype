@@ -16,10 +16,16 @@ namespace recore.db
         public Postgres(string connectionString)
         {
             this.connection = new NpgsqlConnection(connectionString);
+        }
+        public void Open(){
             this.connection.Open();
+        }
+        public void Close(){
+            this.connection.Close();
         }
         public bool CheckInitialized()
         {
+            this.Open();
             NpgsqlCommand command = new NpgsqlCommand("select * from information_schema.tables", this.connection);
             var reader = command.ExecuteReader();
             List<string> tables = new List<string>();
@@ -29,24 +35,27 @@ namespace recore.db
             }
 
             reader.Close();
+            this.Close();
             return tables.Contains("config") && tables.Contains("recordtype");
         }
 
         public void Initialize()
         {
+            this.Open();
             string createConfigText = @"create table Config (
                 version integer not null);";
             string createRecordTypeText = @" create table RecordType
             (
-            RecordTypeId uuid not null primary key,
+            TableName varchar(100) not null primary key,
             Name varchar(100) not null,
-            TableName varchar(100) not null,
+            RecordTypeId uuid not null,
             Columns text not null
             )";
             NpgsqlCommand command = new NpgsqlCommand(createConfigText, this.connection);
             command.ExecuteNonQuery();
             command = new NpgsqlCommand(createRecordTypeText, this.connection);
             command.ExecuteNonQuery();
+            this.Close();
         }
 
         public List<RecordType> GetAllTypes()
