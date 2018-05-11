@@ -37,5 +37,17 @@ namespace recore.web.Extension
             RetrieveRecordResult result = (RetrieveRecordResult)service.Execute(getAll);
             return new RecoreView(result.Result);
         }
+
+        public static RecoreForm GetForm(this DataService service, Guid formId)
+        {
+            RetrieveRecordCommand getAll = new RetrieveRecordCommand()
+            {
+                Type = "form",
+                AllFields = true,
+                Id = formId
+            };
+            RetrieveRecordResult result = (RetrieveRecordResult)service.Execute(getAll);
+            return new RecoreForm(result.Result);
+        }
     }
 }

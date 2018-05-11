@@ -1,0 +1,82 @@
+﻿@model RecoreForm
+
+<h1>@Model.FormName</h1>
+<form class="" id="form">
+    @foreach(var field in Model.Fields)
+    {
+        switch (field.FieldType)
+        {
+            case "text":
+                <label for="@field.Name">@field.Label</label><input type ="text" id="@field.Name"/>
+                break;
+            case "number":
+                <label for="@field.Name">@field.Label</label><input type ="number" id="@field.Name"/>
+                break;
+        }
+    }
+    <button class="btn btn-default" id="button">Save</button>
+</form>
+<script type="text/javascript">
+    var fields = [
+        @foreach (var item in Model.Fields)
+        {
+            <text>
+            {
+                field: '@item.Field',
+                name: '@item.Name'
+            },
+            </text>
+        }
+    ];
+    var recordType = '@Model.RecordType';
+    var recordId = '@ViewData["id"]';
+
+    function SubmitForm() {
+        var request = new XMLHttpRequest();
+        if (recordId == '') {
+            request.open("POST", "/data/" + recordType + "/");
+        }
+        else {
+            request.open("PATCH", "/data/" + recordType + "/" + recordId + "/");
+        }
+        request.setRequestHeader("Content-Type", "application/json");
+        request.onload = function () {
+            if (request.status >= 200 && request.status < 300) {
+                if (recordId === '') {
+                    recordId = JSON.parse(request.responseText);
+                }
+                window.location.href="/Form/@Model.FormId/" + recordId
+            }
+            else {
+                alert(request.responseText);
+            }
+        }
+        let output = {};
+        fields.forEach(function (field) {
+            output[field.field] = document.getElementById(field.name).value;
+        });
+
+        request.send(JSON.stringify({ Data: output }));
+    }
+    function LoadForm() {
+        var request = new XMLHttpRequest();
+        request.open("GET", "/data/" + recordType + "/" + recordId);
+        request.onload = function () {
+            if (request.status >= 200 && request.status < 300) {
+                var data = JSON.parse(request.responseText).data;
+                fields.forEach(function (item) {
+                    document.getElementById(item.name).value = data[item.field];
+                });
+            }
+            else {
+                alert(request.responseText);
+            }
+
+        }
+        request.send();
+    }
+    document.getElementById("button").addEventListener("click", function (event) { event.preventDefault(); SubmitForm(); });
+    if (recordId != "") {
+        LoadForm();
+    }
+</script>

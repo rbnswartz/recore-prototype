@@ -53,6 +53,15 @@ namespace recore.web.Controllers
                     new TextField("contents", 10000, false),
                 }
             };
+            RecordType Form = new RecordType("Form", "form")
+            {
+                Fields = new List<IFieldType>()
+                {
+                    new TextField("name", 100, false),
+                    new TextField("recordtype", 100, false),
+                    new TextField("fields", 10000, false),
+                }
+            };
             RecordType Log = new RecordType("Log", "log")
             {
                 Fields = new List<IFieldType>()
@@ -63,6 +72,7 @@ namespace recore.web.Controllers
             service.Execute(new CreateRecordTypeCommand() { Target = Sitemap });
             service.Execute(new CreateRecordTypeCommand() { Target = View });
             service.Execute(new CreateRecordTypeCommand() { Target = Log });
+            service.Execute(new CreateRecordTypeCommand() { Target = Form });
             return true;
         }
         [HttpGet]
