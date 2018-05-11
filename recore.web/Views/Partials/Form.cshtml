@@ -7,10 +7,10 @@
         switch (field.FieldType)
         {
             case "text":
-                <label for="@field.Name">@field.Label</label><input type ="text" id="@field.Name"/>
+                <div class="form-group"><label for="@field.Name">@field.Label</label><input class="form-control" type ="text" id="@field.Name"/></div>
                 break;
             case "number":
-                <label for="@field.Name">@field.Label</label><input type ="number" id="@field.Name"/>
+                <div class="form-group"><label for="@field.Name">@field.Label</label><input class="form-control" type ="number" id="@field.Name"/></div>
                 break;
         }
     }

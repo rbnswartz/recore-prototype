@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using recore.db;
 using recore.db.Commands;
 using recore.db.FieldTypes;
+using recore.web.Models;
 
 namespace recore.web.Controllers
 {
@@ -69,11 +71,41 @@ namespace recore.web.Controllers
                     new TextField("text", 100, false),
                 }
             };
+            List<Record> forms = new List<Record>(){
+                GenerateFormForRecordType(Form),
+                GenerateFormForRecordType(View),
+                GenerateFormForRecordType(Sitemap),
+                GenerateFormForRecordType(Log),
+            };
+
             service.Execute(new CreateRecordTypeCommand() { Target = Sitemap });
             service.Execute(new CreateRecordTypeCommand() { Target = View });
             service.Execute(new CreateRecordTypeCommand() { Target = Log });
             service.Execute(new CreateRecordTypeCommand() { Target = Form });
+
+            foreach(var form in forms){
+                service.Execute(new CreateRecordCommand{ Target = form});
+            }
+
             return true;
+        }
+        Record GenerateFormForRecordType(RecordType type)
+        {
+            Record output = new Record(){Type = "form"};
+            output["name"] = "Main";
+            output["recordtype"] = type.TableName;
+            List<RecoreFormField> fields = new List<RecoreFormField>();
+            foreach(var field in type.Fields)
+            {
+                fields.Add(new RecoreFormField {
+                    Name = field.Name,
+                    Field = field.Name,
+                    Label = field.Name,
+                    FieldType = "text"
+                });
+            }
+            output["fields"] = JsonConvert.SerializeObject(fields);
+            return output;
         }
         [HttpGet]
         [Route("system/recordtype/{entityName}/fields")]
