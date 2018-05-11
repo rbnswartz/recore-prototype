@@ -2,8 +2,8 @@
     ViewData["Title"] = "Home Page";
 }
 <div class="card">
-    <div class = "card-header"><h5>Test view</h5></div>
-    <div class="card-block">
+    <div class = "card-header"><h5>@(ViewData["Form"].FormName)</h5></div>
+    <div class="card-body">
         @Html.Partial("../Partials/Form", ViewData["Form"] )
     </div>
 </div>

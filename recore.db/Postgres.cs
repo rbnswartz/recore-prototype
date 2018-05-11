@@ -262,6 +262,7 @@ namespace recore.db
 
         public void UpdateRecord(Record record)
         {
+            // TODO: This should actually use paramaters in the update same as we do for create
             List<string> updates = record.Data.Keys.Select(k => $"{k}=@{k}").ToList();
             string insertSql =
                 $"update {record.Type} set {string.Join(",", updates)} where {record.Type}id = @id";
