@@ -264,9 +264,10 @@ namespace recore.db
         {
             List<string> updates = record.Data.Keys.Select(k => $"{k}=@{k}").ToList();
             string insertSql =
-                $"update {record.Type} set {string.Join(",", updates)}";
+                $"update {record.Type} set {string.Join(",", updates)} where {record.Type}id = @id";
             NpgsqlCommand updateCommand =
                 new NpgsqlCommand(insertSql, this.connection);
+            updateCommand.Parameters.Add(CreateParameter("id", record.Id));
             foreach (var item in record.Data)
             {
                 updateCommand.Parameters.Add(this.CreateParameter(item.Key, item.Value));
