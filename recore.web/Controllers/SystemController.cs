@@ -62,7 +62,7 @@ namespace recore.web.Controllers
                     new TextField("name", 100, false),
                     new TextField("recordtype", 100, false),
                     new TextField("fields", 10000, false),
-                    new BooleanField("default", false),
+                    new BooleanField("defaultform", false),
                 }
             };
             RecordType Log = new RecordType("Log", "log")
@@ -106,6 +106,7 @@ namespace recore.web.Controllers
                 });
             }
             output["fields"] = JsonConvert.SerializeObject(fields);
+            output["defaultform"] = true;
             return output;
         }
         [HttpGet]

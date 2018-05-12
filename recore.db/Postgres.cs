@@ -242,6 +242,9 @@ namespace recore.db
                 case Guid _:
                     type = DbType.Guid;
                     break;
+                case Boolean _:
+                    type = DbType.Boolean;
+                    break;
                 case DateTime _:
                     type = DbType.DateTime;
                     break;
