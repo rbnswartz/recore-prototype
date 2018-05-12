@@ -49,5 +49,18 @@ namespace recore.web.Extension
             RetrieveRecordResult result = (RetrieveRecordResult)service.Execute(getAll);
             return new RecoreForm(result.Result);
         }
+
+        public static RecoreForm GetDefaultForm(this DataService service, string recordType)
+        {
+            RetrieveAllCommand getAll = new RetrieveAllCommand()
+            {
+                RecordType = "form",
+                Columns = new List<string> { "recordtype", "formid", "defaultform", "fields", }
+            };
+            // This needs to go into the db whenever I get around to querying
+            RetrieveAllResult result = (RetrieveAllResult)service.Execute(getAll);
+            Record defaultForm = result.Result.First(r => (string)r["recordtype"] == recordType && (bool)r["defaultform"] == true);
+            return new RecoreForm(defaultForm);
+        }
     }
 }

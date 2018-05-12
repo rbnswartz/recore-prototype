@@ -12,6 +12,7 @@ namespace recore.web.Models
     {
         public string recordType;
         public Dictionary<string, string> Columns;
+        public Guid DefaultForm;
 
         public RecoreView(string type)
         {

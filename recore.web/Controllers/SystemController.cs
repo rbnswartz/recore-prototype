@@ -88,6 +88,44 @@ namespace recore.web.Controllers
                 service.Execute(new CreateRecordCommand{ Target = form});
             }
 
+            // Create some of the base UI
+            Record formView = new Record("view")
+            {
+                ["label"] = "All Forms",
+                ["recordtype"] = "form",
+                ["contents"] = JsonConvert.SerializeObject(new Dictionary<string, string>() { { "formid", "formid" }, { "name", "name" } }),
+            };
+
+            // A view of views. Yeah the name is a little wonky
+            Record viewView = new Record("view")
+            {
+                ["label"] = "All Views",
+                ["recordtype"] = "view",
+                ["contents"] = JsonConvert.SerializeObject(new Dictionary<string, string>() { { "viewid", "viewid" }, { "label", "label" } }),
+            };
+            Guid formViewId = ((CreateRecordResult)service.Execute(new CreateRecordCommand { Target = formView })).RecordId;
+            Guid viewViewId = ((CreateRecordResult)service.Execute(new CreateRecordCommand { Target = viewView })).RecordId;
+
+            Record formViewSitemap = new Record("sitemap")
+            {
+                ["label"] = "All Forms",
+                ["type"] = "view",
+                ["url"] = formViewId.ToString(),
+                ["recordtype"] = "form",
+            };
+
+            Record viewViewSitemap = new Record("sitemap")
+            {
+                ["label"] = "All Views",
+                ["type"] = "view",
+                ["url"] = viewViewId.ToString(),
+                ["recordtype"] = "view",
+            };
+
+            service.Execute(new CreateRecordCommand { Target = formViewSitemap });
+            service.Execute(new CreateRecordCommand { Target = viewViewSitemap });
+
+
             return true;
         }
         Record GenerateFormForRecordType(RecordType type)

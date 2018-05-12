@@ -9,6 +9,11 @@ namespace recore.db
         {
             Data = new Dictionary<string, object>();
         }
+        public Record(string recordType)
+        {
+            Data = new Dictionary<string, object>();
+            Type = recordType;
+        }
         public Guid Id;
         public string Type;
         public Dictionary<string, object> Data;

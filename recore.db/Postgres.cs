@@ -170,7 +170,7 @@ namespace recore.db
 
         private List<string> EnsureIdColumn(List<string> input, string typeName)
         {
-            if (!input.Contains(typeName))
+            if (!input.Contains(typeName + "id"))
             {
                 input.Add(typeName + "id");
             }

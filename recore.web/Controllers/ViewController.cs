@@ -26,7 +26,9 @@ namespace recore.web.Controllers
                 data = new Postgres(connectionString),
             };
             ViewData["sitemap"] = service.GetSiteMap();
-            ViewData["view"] = service.GetView(viewId);
+            RecoreView view = service.GetView(viewId);
+            ViewData["defaultForm"] = service.GetDefaultForm(view.recordType).FormId;
+            ViewData["view"] = view;
             return View();
         }
     }
