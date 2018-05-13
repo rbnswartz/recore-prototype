@@ -2,24 +2,28 @@
 
 <h1>@Model.FormName</h1>
 <div id="app">
-<form class="" id="form">
-    @foreach(var field in Model.Fields)
+    <form class="" id="form">
+        @foreach (var field in Model.Fields)
     {
         switch (field.FieldType)
         {
             case "text":
-                <div class="form-group"><label for="@field.Name">@field.Label</label><input class="form-control" type ="text" id="@field.Name" v-model="model.@field.Field" /></div>
-                break;
-            case "number":
-                <div class="form-group"><label for="@field.Name">@field.Label</label><input class="form-control" type ="number" id="@field.Name"/></div>
-                break;
-        }
-    }
-    <button class="btn btn-default" id="button" v-on:click="SubmitForm">Save</button>
-</form>
+                <text-field label="@field.Label" name="@field.Name" v-bind:fielddata="model.@field.Field" v-on:recorechange="model.@field.Field = $event"></text-field>
+            break;
+        case "number":
+            <div class="form-group"><label for="@field.Name">@field.Label</label><input class="form-control" type="number" id="@field.Name" /></div>
+        break;
+}
+}
+        <button class="btn btn-default" id="button" v-on:click="SubmitForm">Save</button>
+    </form>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script type="text/javascript">
+    Vue.component('text-field', {
+        props: ['label', 'name', 'fielddata'],
+        template: '<div class="form-group"><label v-bind:for="name">{{label}}</label><input class="form-control" type ="text" v-bind:id="name" v-bind:value="fielddata" v-on:input="$emit(\'recorechange\', $event.target.value)"/></div>'
+    });
     var app = new Vue({
         el: "#app",
         data: {
