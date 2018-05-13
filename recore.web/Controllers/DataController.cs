@@ -50,6 +50,11 @@ namespace recore.web.Controllers
         [Route("data/{recordType}/{id}")]
         public Record Get(string recordType, Guid id, List<string> columns)
         {
+            // because apparently comma seperation isn't enough to make a list
+            if (columns.Count == 1)
+            {
+                columns = columns[0].Split(",").ToList();
+            }
             IDataSource data = new Postgres(connectionString);
             DataService service = new DataService();
             service.data = data;

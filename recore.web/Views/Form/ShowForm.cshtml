@@ -2,8 +2,12 @@
     ViewData["Title"] = "Home Page";
 }
 <div class="card">
-    <div class = "card-header"><h5>@(ViewData["Form"].FormName)</h5></div>
+    <div class = "card-header"><h5>@(((RecoreForm)ViewData["form"]).FormName)</h5></div>
     <div class="card-body">
-        @Html.Partial("../Partials/Form", ViewData["Form"] )
+        @Html.Partial("../Partials/Form", ViewData["form"] )
     </div>
 </div>
+
+@section ButtonList{ 
+
+}

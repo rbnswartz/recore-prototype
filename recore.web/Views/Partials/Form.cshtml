@@ -1,83 +1,98 @@
 ﻿@model RecoreForm
 
 <h1>@Model.FormName</h1>
+<div id="app">
 <form class="" id="form">
     @foreach(var field in Model.Fields)
     {
         switch (field.FieldType)
         {
             case "text":
-                <div class="form-group"><label for="@field.Name">@field.Label</label><input class="form-control" type ="text" id="@field.Name"/></div>
+                <div class="form-group"><label for="@field.Name">@field.Label</label><input class="form-control" type ="text" id="@field.Name" v-model="model.@field.Field" /></div>
                 break;
             case "number":
                 <div class="form-group"><label for="@field.Name">@field.Label</label><input class="form-control" type ="number" id="@field.Name"/></div>
                 break;
         }
     }
-    <button class="btn btn-default" id="button">Save</button>
+    <button class="btn btn-default" id="button" v-on:click="SubmitForm">Save</button>
 </form>
-
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script type="text/javascript">
-    var fields = [
-        @foreach (var item in Model.Fields)
-        {
-            <text>
-            {
-                field: '@item.Field',
-                name: '@item.Name'
-            },
-            </text>
-        }
-    ];
-    var recordType = '@Model.RecordType';
-    var recordId = '@ViewData["id"]';
-
-    function SubmitForm() {
-        var request = new XMLHttpRequest();
-        if (recordId == '') {
-            request.open("POST", "/data/" + recordType + "/");
-        }
-        else {
-            request.open("PATCH", "/data/" + recordType + "/" + recordId + "/");
-        }
-        request.setRequestHeader("Content-Type", "application/json");
-        request.onload = function () {
-            if (request.status >= 200 && request.status < 300) {
-                if (recordId === '') {
-                    recordId = JSON.parse(request.responseText);
+    var app = new Vue({
+        el: "#app",
+        data: {
+            fields: [
+                @foreach (var item in Model.Fields)
+                {
+                    <text>
+                    {
+                        field: '@item.Field',
+                        name: '@item.Name'
+                    },
+                    </text>
                 }
-                window.location.href="/Form/@Model.FormId/" + recordId
-            }
-            else {
-                alert(request.responseText);
-            }
-        }
-        let output = {};
-        fields.forEach(function (field) {
-            output[field.field] = document.getElementById(field.name).value;
-        });
-
-        request.send(JSON.stringify({ Data: output }));
-    }
-    function LoadForm() {
-        var request = new XMLHttpRequest();
-        request.open("GET", "/data/" + recordType + "/" + recordId);
-        request.onload = function () {
-            if (request.status >= 200 && request.status < 300) {
-                var data = JSON.parse(request.responseText).data;
-                fields.forEach(function (item) {
-                    document.getElementById(item.name).value = data[item.field];
+            ],
+            recordType:'@Model.RecordType', 
+            recordId: '@ViewData["id"]',
+            model: {},
+        },
+        methods: {
+            SubmitForm() {
+                    var request = new XMLHttpRequest();
+                    if (this.recordId == '') {
+                        request.open("POST", "/data/" + this.recordType + "/");
+                    }
+                    else {
+                        request.open("PATCH", "/data/" + this.recordType + "/" + this.recordId + "/");
+                    }
+                    request.setRequestHeader("Content-Type", "application/json");
+                    request.onload = function () {
+                        if (request.status >= 200 && request.status < 300) {
+                            if (this.recordId === '') {
+                                this.recordId = JSON.parse(request.responseText);
+                            }
+                            window.location.href="/Form/@Model.FormId/" + this.recordId
+                        }
+                        else {
+                            alert(request.responseText);
+                        }
+                    }
+                    var send = {};
+                    this.fields.forEach(function (field) {
+                        send[field.field] = app.model[field.field];
+                    });
+                    request.send(JSON.stringify({ Data: send }));
+            },
+            GetFormFields() {
+                var output = [];
+                this.fields.forEach(function (field) {
+                    if (output.indexOf(field.field) == -1) {
+                        output.push(field.field);
+                    }
                 });
-            }
-            else {
-                alert(request.responseText);
-            }
+                return output;
+            },
+            LoadForm() {
+                var request = new XMLHttpRequest();
+                request.open("GET", "/data/" + this.recordType + "/" + this.recordId + "?columns=" + this.GetFormFields().join(","));
+                request.onload = function () {
+                    if (request.status >= 200 && request.status < 300) {
+                        app.model = JSON.parse(request.responseText).data;
+                    }
+                    else {
+                        alert(request.responseText);
+                    }
 
-        }
-        request.send();
-    }
-    document.getElementById("button").addEventListener("click", function (event) { event.preventDefault(); SubmitForm(); });
-    if (recordId != "") {
-        LoadForm();
-    }
+                }
+                request.send();
+            }
+        },
+        mounted: function () {
+            if (this.recordId != '') {
+                this.LoadForm();
+            }
+        },
+    });
 </script>
