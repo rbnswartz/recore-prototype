@@ -123,7 +123,7 @@ namespace recore.web.Controllers
             {
                 Target = record
             };
-            DeleteRecordResult result = (DeleteRecordResult)service.Execute(command);
+            UpdateRecordResult result = (UpdateRecordResult)service.Execute(command);
         }
     }
 }

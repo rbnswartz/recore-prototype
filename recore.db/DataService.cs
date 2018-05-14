@@ -101,7 +101,7 @@ namespace recore.db
                 {
                     UpdateRecordCommand updateCommand = (UpdateRecordCommand)command;
                     this.data.UpdateRecord(updateCommand.Target);
-                    output = new DeleteRecordResult();
+                    output = new UpdateRecordResult();
                     break;
                 }
                 case RetrieveAllRecordTypesCommand _:

@@ -65,7 +65,7 @@
                     this.fields.forEach(function (field) {
                         send[field.field] = app.model[field.field];
                     });
-                    request.send(JSON.stringify({ Data: send }));
+                    request.send(JSON.stringify({ data: send }));
             },
             GetFormFields() {
                 var output = [];
