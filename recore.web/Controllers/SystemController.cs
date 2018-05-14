@@ -72,17 +72,27 @@ namespace recore.web.Controllers
                     new TextField("text", 100, false),
                 }
             };
+            RecordType FormComponent = new RecordType("Form Component", "formcomponent")
+            {
+                Fields = new List<IFieldType>()
+                {
+                    new TextField("name", 100, false),
+                    new TextField("definition", 10000, false),
+                }
+            };
             List<Record> forms = new List<Record>(){
                 GenerateFormForRecordType(Form),
                 GenerateFormForRecordType(View),
                 GenerateFormForRecordType(Sitemap),
                 GenerateFormForRecordType(Log),
+                GenerateFormForRecordType(FormComponent),
             };
 
             service.Execute(new CreateRecordTypeCommand() { Target = Sitemap });
             service.Execute(new CreateRecordTypeCommand() { Target = View });
             service.Execute(new CreateRecordTypeCommand() { Target = Log });
             service.Execute(new CreateRecordTypeCommand() { Target = Form });
+            service.Execute(new CreateRecordTypeCommand() { Target = FormComponent });
 
             foreach(var form in forms){
                 service.Execute(new CreateRecordCommand{ Target = form});
@@ -93,7 +103,7 @@ namespace recore.web.Controllers
             {
                 ["label"] = "All Forms",
                 ["recordtype"] = "form",
-                ["contents"] = JsonConvert.SerializeObject(new Dictionary<string, string>() { { "formid", "formid" }, { "name", "name" } }),
+                ["contents"] = JsonConvert.SerializeObject(new Dictionary<string, string>() { { "formid", "formid" }, { "name", "name" }, { "recordtype", "recordtype" }}),
             };
 
             // A view of views. Yeah the name is a little wonky
@@ -101,7 +111,7 @@ namespace recore.web.Controllers
             {
                 ["label"] = "All Views",
                 ["recordtype"] = "view",
-                ["contents"] = JsonConvert.SerializeObject(new Dictionary<string, string>() { { "viewid", "viewid" }, { "label", "label" } }),
+                ["contents"] = JsonConvert.SerializeObject(new Dictionary<string, string>() { { "viewid", "viewid" }, { "label", "label" }, { "recordtype", "recordtype" } }),
             };
             Guid formViewId = ((CreateRecordResult)service.Execute(new CreateRecordCommand { Target = formView })).RecordId;
             Guid viewViewId = ((CreateRecordResult)service.Execute(new CreateRecordCommand { Target = viewView })).RecordId;
@@ -125,8 +135,45 @@ namespace recore.web.Controllers
             service.Execute(new CreateRecordCommand { Target = formViewSitemap });
             service.Execute(new CreateRecordCommand { Target = viewViewSitemap });
 
+            CreateFormComponents(service);
 
             return true;
+        }
+        void CreateFormComponents(DataService service)
+        {
+            Record textField = new Record("formcomponent")
+            {
+                ["name"] = "text-field",
+                ["definition"] = @"
+                Vue.component('text-field', {
+                    props: ['label', 'name', 'fielddata'],
+                    template: '<div class=""form-group""><label v-bind:for=""name"">{{label}}</label><input class=""form-control"" type =""text"" v-bind:id=""name"" v-bind:value=""fielddata"" v-on:input=""$emit(\'recorechange\', $event.target.value)""/></div>'
+                });
+                "
+            };
+            Record numberField = new Record("formcomponent")
+            {
+                ["name"] = "number-field",
+                ["definition"] = @"
+                Vue.component('number-field', {
+                    props: ['label', 'name', 'fielddata'],
+                    template: '<div class=""form-group""><label v-bind:for=""name"">{{label}}</label><input class=""form-control"" type =""number"" v-bind:id=""name"" v-bind:value=""fielddata"" v-on:input=""$emit(\'recorechange\', $event.target.value)""/></div>'
+                });
+                "
+            };
+            Record booleanField = new Record("formcomponent")
+            {
+                ["name"] = "boolean-field",
+                ["definition"] = @"
+                Vue.component('boolean-field', {
+                    props: ['label', 'name', 'fielddata'],
+                    template: '<div class=""form-group""><label v-bind:for=""name"">{{label}}</label><input class=""form-control"" type =""checkbox"" v-bind:id=""name"" v-bind:checked=""fielddata"" v-on:input=""$emit(\'recorechange\', $event.target.checked)""/></div>'
+                });
+                "
+            };
+            service.Execute(new CreateRecordCommand() { Target = textField });
+            service.Execute(new CreateRecordCommand() { Target = numberField });
+            service.Execute(new CreateRecordCommand() { Target = booleanField });
         }
         Record GenerateFormForRecordType(RecordType type)
         {
@@ -140,7 +187,7 @@ namespace recore.web.Controllers
                     Name = field.Name,
                     Field = field.Name,
                     Label = field.Name,
-                    FieldType = "text"
+                    FieldType = "text-field"
                 });
             }
             output["fields"] = JsonConvert.SerializeObject(fields);

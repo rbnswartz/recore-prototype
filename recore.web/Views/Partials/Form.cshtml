@@ -1,29 +1,27 @@
 ﻿@model RecoreForm
-
+@{ 
+    string RenderField(RecoreFormField field)
+    {
+        return $"<{field.FieldType} label=\"{ field.Label}\" name=\"{field.Name}\" v-bind:fielddata=\"model.{field.Field}\" v-on:recorechange=\"model.{field.Field} = $event\"></{field.FieldType}>";
+    }
+}
 <h1>@Model.FormName</h1>
 <div id="app">
     <form class="" id="form">
         @foreach (var field in Model.Fields)
-    {
-        switch (field.FieldType)
         {
-            case "text":
-                <text-field label="@field.Label" name="@field.Name" v-bind:fielddata="model.@field.Field" v-on:recorechange="model.@field.Field = $event"></text-field>
-            break;
-        case "number":
-            <div class="form-group"><label for="@field.Name">@field.Label</label><input class="form-control" type="number" id="@field.Name" /></div>
-        break;
-}
-}
+            @Html.Raw(RenderField(field))
+        }
+
         <button class="btn btn-default" id="button" v-on:click="SubmitForm">Save</button>
     </form>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script type="text/javascript">
-    Vue.component('text-field', {
-        props: ['label', 'name', 'fielddata'],
-        template: '<div class="form-group"><label v-bind:for="name">{{label}}</label><input class="form-control" type ="text" v-bind:id="name" v-bind:value="fielddata" v-on:input="$emit(\'recorechange\', $event.target.value)"/></div>'
-    });
+    @foreach(string component in (IEnumerable<string>)ViewData["components"])
+    {
+        @Html.Raw(component)
+    }
     var app = new Vue({
         el: "#app",
         data: {
