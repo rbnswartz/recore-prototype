@@ -1,35 +1,49 @@
 @model RecoreView;
-<table class = "table" id="view">
-    <thead>
-        <tr>
-        @foreach(var item in Model.Columns){
-            <th>@item.Value</th>
-        }
+<div id="app">
+    <table class = "table" id="view">
+        <thead>
+            <tr>
+            @foreach(var item in Model.Columns){
+                <th>@item.Value</th>
+            }
+            </tr>
+        </thead>
+    <tbody>
+        <tr v-for="row in records">
+            @foreach(var item in Model.Columns){
+                <td>{{row.data.@item.Key}}</td>
+            }
         </tr>
-    </thead>
-<tbody>
-</tbody>
-</table>
+    </tbody>
+    </table>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script type="text/javascript">
-    var columns = [
-        @Html.Raw(string.Join(",", Model.Columns.Keys.Select(k => $"'{k}'")))
-    ];
-    var target = document.querySelector("tbody");
-    var request = new XMLHttpRequest();
-    request.open("GET", "/data/@Model.recordType/")
-    request.onreadystatechange = function(){
-        if (request.readyState >= 4){
-            var result = JSON.parse(request.responseText);
-            result.forEach(function (row) {
-                var newRow = document.createElement("tr");
-                columns.forEach(function (column) {
-                    var newColumn = document.createElement("td");
-                    newColumn.innerText = row.data[column];
-                    newRow.appendChild(newColumn);
-                });
-                target.appendChild(newRow);
-            });
+    var app = new Vue({
+        el: "#app",
+        data: {
+            columns: [
+                @Html.Raw(string.Join(",", Model.Columns.Keys.Select(k => $"'{k}'")))
+            ],
+            recordType: "@Model.recordType",
+            records: [],
+        },
+        methods: {
+            LoadViewData: function () {
+                var target = document.querySelector("tbody");
+                var request = new XMLHttpRequest();
+                request.open("GET", "/data/" + this.recordType + "/")
+                request.onreadystatechange = function(){
+                    if (request.readyState >= 4){
+                        app.records = JSON.parse(request.responseText);
+                    }
+                };
+                request.send();
+            }
+        },
+        mounted: function(){
+            this.LoadViewData();
         }
-    };
-    request.send();
+
+    });
 </script>
