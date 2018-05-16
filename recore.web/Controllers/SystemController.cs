@@ -215,8 +215,8 @@ namespace recore.web.Controllers
                 ["name"] = "text-field",
                 ["definition"] = @"
                 Vue.component('text-field', {
-                    props: ['label', 'name', 'fielddata'],
-                    template: '<div class=""form-group""><label v-bind:for=""name"">{{label}}</label><input class=""form-control"" type =""text"" v-bind:id=""name"" v-bind:value=""fielddata"" v-on:input=""$emit(\'recorechange\', $event.target.value)""/></div>'
+                    props: ['label', 'name', 'value', 'config'],
+                    template: '<div class=""form-group""><label v-bind:for=""name"">{{label}}</label><input class=""form-control"" type =""text"" v-bind:id=""name"" v-bind:value=""value"" v-on:input=""$emit(\'recorechange\', $event.target.value)""/></div>'
                 });
                 "
             };
@@ -225,8 +225,8 @@ namespace recore.web.Controllers
                 ["name"] = "number-field",
                 ["definition"] = @"
                 Vue.component('number-field', {
-                    props: ['label', 'name', 'fielddata'],
-                    template: '<div class=""form-group""><label v-bind:for=""name"">{{label}}</label><input class=""form-control"" type =""number"" v-bind:id=""name"" v-bind:value=""fielddata"" v-on:input=""$emit(\'recorechange\', $event.target.value)""/></div>'
+                    props: ['label', 'name', 'value', 'config'],
+                    template: '<div class=""form-group""><label v-bind:for=""name"">{{label}}</label><input class=""form-control"" type =""number"" v-bind:id=""name"" v-bind:value=""value"" v-on:input=""$emit(\'recorechange\', $event.target.value)""/></div>'
                 });
                 "
             };
@@ -235,8 +235,8 @@ namespace recore.web.Controllers
                 ["name"] = "boolean-field",
                 ["definition"] = @"
                 Vue.component('boolean-field', {
-                    props: ['label', 'name', 'fielddata'],
-                    template: '<div class=""form-group""><label v-bind:for=""name"">{{label}}</label><input class=""form-control"" type =""checkbox"" v-bind:id=""name"" v-bind:checked=""fielddata"" v-on:input=""$emit(\'recorechange\', $event.target.checked)""/></div>'
+                    props: ['label', 'name', 'value', 'config'],
+                    template: '<div class=""form-group""><label v-bind:for=""name"">{{label}}</label><input class=""form-control"" type =""checkbox"" v-bind:id=""name"" v-bind:checked=""value"" v-on:input=""$emit(\'recorechange\', $event.target.checked)""/></div>'
                 });
                 "
             };

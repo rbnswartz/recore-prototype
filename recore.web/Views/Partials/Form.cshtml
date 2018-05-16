@@ -2,7 +2,8 @@
 @{ 
     string RenderField(RecoreFormField field)
     {
-        return $"<{field.FieldType} label=\"{ field.Label}\" name=\"{field.Name}\" v-bind:fielddata=\"model.{field.Field}\" v-on:recorechange=\"model.{field.Field} = $event\"></{field.FieldType}>";
+        string config = field.Config == null ? "" : "v-bind:config=\"{" + string.Join(",",field.Config.Select(c => $"{c.Key}: '{c.Value}'")) + "}\"";
+        return $"<{field.FieldType} label=\"{ field.Label}\" name=\"{field.Name}\" v-bind:value=\"model.{field.Field}\" v-on:recorechange=\"model.{field.Field} = $event\" {config}></{field.FieldType}>";
     }
 }
 <h1>@Model.FormName</h1>
