@@ -1,6 +1,6 @@
 ﻿namespace recore.db.Commands
 {
-    public class UpdateRecordResult
+    public class UpdateRecordResult : ResultBase
     {
         
     }
