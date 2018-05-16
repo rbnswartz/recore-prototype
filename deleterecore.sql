@@ -5,3 +5,4 @@ drop table recordtype;
 drop table sitemap;
 drop table view;
 drop table formcomponent;
+drop table viewcomponent;

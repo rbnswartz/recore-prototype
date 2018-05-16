@@ -27,6 +27,7 @@ namespace recore.web.Controllers
         [Route("system/init")]
         public bool Init()
         {
+            //TODO: Refactor this as it is getting really messy
             DataService service = new DataService()
             {
                 data = new Postgres(connectionString),
@@ -80,12 +81,21 @@ namespace recore.web.Controllers
                     new TextField("definition", 10000, false),
                 }
             };
+            RecordType ViewComponent = new RecordType("View Component", "viewcomponent")
+            {
+                Fields = new List<IFieldType>()
+                {
+                    new TextField("name", 100, false),
+                    new TextField("definition", 10000, false),
+                }
+            };
+            var formForm = GenerateFormForRecordType(Form);
+            var viewForm = GenerateFormForRecordType(View);
             List<Record> forms = new List<Record>(){
-                GenerateFormForRecordType(Form),
-                GenerateFormForRecordType(View),
                 GenerateFormForRecordType(Sitemap),
                 GenerateFormForRecordType(Log),
                 GenerateFormForRecordType(FormComponent),
+                GenerateFormForRecordType(ViewComponent),
             };
 
             service.Execute(new CreateRecordTypeCommand() { Target = Sitemap });
@@ -93,17 +103,26 @@ namespace recore.web.Controllers
             service.Execute(new CreateRecordTypeCommand() { Target = Log });
             service.Execute(new CreateRecordTypeCommand() { Target = Form });
             service.Execute(new CreateRecordTypeCommand() { Target = FormComponent });
+            service.Execute(new CreateRecordTypeCommand() { Target = ViewComponent });
 
             foreach(var form in forms){
                 service.Execute(new CreateRecordCommand{ Target = form});
             }
+
+            var formResult = (CreateRecordResult)service.Execute(new CreateRecordCommand{ Target = formForm});
+            var viewResult = (CreateRecordResult)service.Execute(new CreateRecordCommand{ Target = viewForm});
+
 
             // Create some of the base UI
             Record formView = new Record("view")
             {
                 ["label"] = "All Forms",
                 ["recordtype"] = "form",
-                ["contents"] = JsonConvert.SerializeObject(new Dictionary<string, string>() { { "formid", "formid" }, { "name", "name" }, { "recordtype", "recordtype" }}),
+                ["contents"] = JsonConvert.SerializeObject(new List<RecoreFormField>() {
+                    new RecoreFormField { Field = "formid", Label = "Edit", FieldType = "form-link", Config= new Dictionary<string, string> { { "formid", formResult.RecordId.ToString() } } },
+                    new RecoreFormField { Field = "formid", Label = "Form Id", FieldType = "text-field" },
+                    new RecoreFormField { Field = "name", Label = "Name", FieldType = "text-field" },
+                    new RecoreFormField { Field = "recordtype", Label = "Record Type", FieldType = "text-field"}}),
             };
 
             // A view of views. Yeah the name is a little wonky
@@ -111,7 +130,11 @@ namespace recore.web.Controllers
             {
                 ["label"] = "All Views",
                 ["recordtype"] = "view",
-                ["contents"] = JsonConvert.SerializeObject(new Dictionary<string, string>() { { "viewid", "viewid" }, { "label", "label" }, { "recordtype", "recordtype" } }),
+                ["contents"] = JsonConvert.SerializeObject(new List<RecoreFormField>() {
+                    new RecoreFormField { Field = "viewid", Label = "Edit", FieldType = "form-link", Config= new Dictionary<string, string> { { "formid", viewResult.RecordId.ToString() } } },
+                    new RecoreFormField { Field = "viewid", Label = "View Id", FieldType = "text-field" },
+                    new RecoreFormField { Field = "label", Label = "Label", FieldType = "text-field" },
+                    new RecoreFormField { Field = "recordtype", Label = "Record Type", FieldType = "text-field" }}),
             };
             Guid formViewId = ((CreateRecordResult)service.Execute(new CreateRecordCommand { Target = formView })).RecordId;
             Guid viewViewId = ((CreateRecordResult)service.Execute(new CreateRecordCommand { Target = viewView })).RecordId;
@@ -136,8 +159,54 @@ namespace recore.web.Controllers
             service.Execute(new CreateRecordCommand { Target = viewViewSitemap });
 
             CreateFormComponents(service);
+            CreateViewComponents(service);
 
             return true;
+        }
+        void CreateCompleteRecordType(DataService service, RecordType type, List<RecoreFormField> viewFields, bool addToSitemap, bool addEditButton)
+        {
+            //Incomplete don't use. I'll be coming back to this later
+            var form = GenerateFormForRecordType(type);
+            var createResult = (CreateRecordTypeResult)service.Execute(new CreateRecordTypeCommand() { Target = type });
+            var formResult = (CreateRecordResult)service.Execute(new CreateRecordCommand { Target = form });
+            viewFields.Add(new RecoreFormField { Field = type.TableName + "id", FieldType = "form-link", Label = "Edit", Config = new Dictionary<string, string>() { { "formid", formResult.RecordId.ToString() } } });
+
+            Record view = new Record("view")
+            {
+                ["label"] = "Form for " + type.TableName,
+                ["recordtype"] = type.TableName,
+                ["contents"] = JsonConvert.SerializeObject(viewFields),
+            };
+        }
+        void CreateViewComponents(DataService service)
+        {
+            Record textField = new Record("viewcomponent")
+            {
+                ["name"] = "text-field",
+                ["definition"] = @"
+                Vue.component('text-field', {
+                    props: ['label', 'name', 'value', 'config'],
+                    template: '<div>{{value}}</div>'
+                });
+                "
+            };
+            Record formLink = new Record("viewcomponent")
+            {
+                ["name"] = "form-link",
+                ["definition"] = @"
+                Vue.component('form-link', {
+                    props: ['label', 'name', 'value', 'config'],
+                    data: function () {
+                        return {
+                            url: '/Form/' + this.config.formid + '/' + this.value,
+                        };
+                    },
+                    template: '<a v-bind:href=""url"">Open</a>'
+                });
+                "
+            };
+            service.Execute(new CreateRecordCommand() { Target = textField });
+            service.Execute(new CreateRecordCommand() { Target = formLink });
         }
         void CreateFormComponents(DataService service)
         {
