@@ -240,9 +240,19 @@ namespace recore.web.Controllers
                 });
                 "
             };
+            Record textareaField = new Record("formcomponent"){
+                ["name"] = "textarea-field",
+                ["definition"] = @"
+                Vue.component('textarea-field', {
+                    props: ['label', 'name', 'value', 'config'],
+                    template: '<div class=""form-group""><label v-bind:for=""name"">{{label}}</label><textarea class=""form-control"" v-bind:id=""name"" v-bind:value=""value"" v-on:input=""$emit(\'recorechange\', $event.target.value)""></textarea></div>'
+                });
+                ",
+            };
             service.Execute(new CreateRecordCommand() { Target = textField });
             service.Execute(new CreateRecordCommand() { Target = numberField });
             service.Execute(new CreateRecordCommand() { Target = booleanField });
+            service.Execute(new CreateRecordCommand() { Target = textareaField });
         }
         Record GenerateFormForRecordType(RecordType type)
         {
