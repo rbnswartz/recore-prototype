@@ -27,7 +27,10 @@ namespace recore.db
                             throw new MissingFieldException($"Record with type {createCommand.Target.Type} doesn't have the column {field}");
                         }
                     }
-
+                    if (createCommand.Target.Id == Guid.Empty)
+                    {
+                        createCommand.Target.Id = Guid.NewGuid();
+                    }
                     createCommand.Target["createdon"] = DateTime.Now;
                     createCommand.Target["modifiedon"] = DateTime.Now;
                     Guid result = this.data.CreateRecord(createCommand.Target);

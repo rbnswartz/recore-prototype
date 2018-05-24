@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using recore.db.FieldTypes;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace recore.db
 {
@@ -84,6 +85,10 @@ namespace recore.db
         
         public RecordType GetRecordType(string typeName)
         {
+            if(!IsSafe(typeName))
+            {
+                throw new Exception($"Record Type: {typeName} is invalid");
+            }
             NpgsqlCommand command = new NpgsqlCommand("select RecordTypeId, Name, TableName, Columns from recordtype where TableName = @name", this.connection);
             command.Parameters.Add(new NpgsqlParameter("name", DbType.String) {Value = typeName});
             var reader = command.ExecuteReader();
@@ -107,7 +112,7 @@ namespace recore.db
 
         public void CreateRecordType(RecordType type)
         {
-            // Unsafe but left that way from prototype means
+            CheckRecordTypeIsSafe(type);
             NpgsqlParameter RecordTypeId = new NpgsqlParameter("RecordTypeId", DbType.Guid) {Value = type.RecordTypeId};
             NpgsqlParameter Name = new NpgsqlParameter("Name", DbType.String) {Value = type.Name};
             NpgsqlParameter TableName = new NpgsqlParameter("TableName", DbType.String) {Value = type.TableName};
@@ -134,8 +139,8 @@ namespace recore.db
 
         public Guid CreateRecord(Record record)
         {
-            Guid createdGuid = Guid.NewGuid();
-            record.Data.Add($"{record.Type}Id", createdGuid);
+            CheckRecordIsSafe(record);
+            record.Data.Add($"{record.Type}Id", record.Id);
             string insertSql =
                 $"insert into {record.Type} ({string.Join(",", record.Data.Keys)}) values ({string.Join(",", record.Data.Keys.Select(k => $"@{k}"))})";
             NpgsqlCommand insertCommand =
@@ -145,14 +150,28 @@ namespace recore.db
                 insertCommand.Parameters.Add(this.CreateParameter(item.Key, item.Value));
             }
             insertCommand.ExecuteNonQuery();
-            return createdGuid;
+            return record.Id;
         }
 
         public Record RetrieveRecord(string typeName, Guid id, List<string> columns)
         {
+            if (!IsSafe(typeName))
+            {
+                throw new Exception($"Record type: {typeName} is invalid");
+            }
+
+            foreach(var column in columns)
+            {
+                if(!IsSafe(column))
+                {
+                    throw new Exception($"Column: {column} is invalid");
+                }
+            }
+
             RecordType type = this.GetRecordType(typeName);
+
+
             columns = EnsureIdColumn(columns, typeName);
-            // Insecure. Needs to sanatize column names
             string selectSQL =
                 $"select {(string.Join(",", columns))} from {typeName} where {typeName}Id = @id";
             NpgsqlCommand selectCommand = new NpgsqlCommand(selectSQL, this.connection);
@@ -194,6 +213,10 @@ namespace recore.db
         // To be replaced later with actual filters
         public List<Record> RetrieveAllRecords(string typeName, List<string> columns)
         {
+            if (!IsSafe(typeName))
+            {
+                throw new Exception($"Record type {typeName} is invalid");
+            }
             RecordType type = this.GetRecordType(typeName);
             columns = EnsureIdColumn(columns, typeName);
             List<Record> output = new List<Record>();
@@ -256,6 +279,10 @@ namespace recore.db
 
         public void DeleteRecord(string recordType, Guid id)
         {
+            if (!IsSafe(recordType))
+            {
+                throw new Exception($"Record type {recordType} is invalid");
+            }
             string deleteSQL =
                 $"delete from {recordType} where {recordType}id=@id";
             NpgsqlCommand selectCommand = new NpgsqlCommand(deleteSQL, this.connection);
@@ -265,7 +292,7 @@ namespace recore.db
 
         public void UpdateRecord(Record record)
         {
-            // TODO: This should actually use paramaters in the update same as we do for create
+            CheckRecordIsSafe(record);
             List<string> updates = record.Data.Keys.Select(k => $"{k}=@{k}").ToList();
             string insertSql =
                 $"update {record.Type} set {string.Join(",", updates)} where {record.Type}id = @id";
@@ -290,6 +317,40 @@ namespace recore.db
                 output.Add(this.ConvertDataRowToRecordTypes(reader));
             }
             return output;
+        }
+
+        private bool IsSafe(string input){
+            Regex safeRegex = new Regex("^[a-zA-Z0-9_]$");
+            return safeRegex.IsMatch(input);
+        }
+
+        private void CheckRecordIsSafe(Record input)
+        {
+            if(!IsSafe(input.Type))
+            {
+                throw new Exception($"Record type: {input.Type} is invalid");
+            }
+            foreach(var field in input.Data)
+            {
+                if(!IsSafe(field.Key))
+                {
+                    throw new Exception($"Field Name: {field.Key} is invalid");
+                }
+            }
+        }
+        private void CheckRecordTypeIsSafe(RecordType input)
+        {
+            if(!IsSafe(input.TableName))
+            {
+                throw new Exception($"Record type: {input.TableName} is invalid");
+            }
+            foreach(var field in input.Fields)
+            {
+                if(!IsSafe(field.Name))
+                {
+                    throw new Exception($"Field Name: {field.Name} is invalid");
+                }
+            }
         }
     }
 }
