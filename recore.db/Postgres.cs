@@ -320,7 +320,7 @@ namespace recore.db
         }
 
         private bool IsSafe(string input){
-            Regex safeRegex = new Regex("^[a-zA-Z0-9_]$");
+            Regex safeRegex = new Regex("^[a-zA-Z0-9_]*$");
             return safeRegex.IsMatch(input);
         }
 
