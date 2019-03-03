@@ -273,32 +273,5 @@ namespace recore.web.Controllers
             output["defaultform"] = true;
             return output;
         }
-        [HttpGet]
-        [Route("system/recordtype/{entityName}/fields")]
-        public List<IFieldType> GetFields(string entityName)
-        {
-            DataService service = new DataService()
-            {
-                data = new Postgres(connectionString),
-            };
-            RetrieveRecordTypeCommand command = new RetrieveRecordTypeCommand()
-            {
-                RecordType = entityName,
-            };
-            var result = (RetrieveRecordTypeResult)service.Execute(command);
-            return result.Type.Fields;
-        }
-        [HttpGet]
-        [Route("system/recordtype/")]
-        public List<RecordType> GetRecordTypes(string entityName)
-        {
-            DataService service = new DataService()
-            {
-                data = new Postgres(connectionString),
-            };
-            var command = new RetrieveAllRecordTypesCommand();
-            var result = (RetrieveAllRecordTypesResult)service.Execute(command);
-            return result.RecordTypes;
-        }
     }
 }

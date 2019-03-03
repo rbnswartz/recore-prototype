@@ -26,7 +26,7 @@ namespace recore.web.Controllers
 
         [HttpGet]
         [Route("system/recordtype/{entityName}/fields")]
-        public List<IFieldType> GetFields(string entityName)
+        public Dictionary<string,RecordFieldMetadata> GetFields(string entityName)
         {
             DataService service = new DataService()
             {
@@ -37,11 +37,39 @@ namespace recore.web.Controllers
                 RecordType = entityName,
             };
             var result = (RetrieveRecordTypeResult)service.Execute(command);
-            return result.Type.Fields;
+            Dictionary<string, RecordFieldMetadata> output = new Dictionary<string, RecordFieldMetadata>();
+            foreach(var i in result.Type.Fields)
+            {
+                output.Add(i.Name, SerializeFieldMetadata(i));
+            }
+            return output;
         }
+
+        [HttpPost]
+        [Route("system/recordtype/{entityName}/fields/{fieldName}")]
+        public bool AddFieldToRecordType(string entityName,string fieldName, [FromBody]RecordFieldMetadata field)
+        {
+            DataService service = new DataService()
+            {
+                data = new Postgres(connectionString),
+            };
+
+            IFieldType createdField = DeserializeFieldMetadata(field);
+            createdField.Name = fieldName;
+
+            AddFieldToRecordTypeCommand command = new AddFieldToRecordTypeCommand()
+            {
+                RecordType = entityName,
+                Field = createdField,
+            };
+
+            service.Execute(command);
+            return true;
+        }
+
         [HttpGet]
         [Route("system/recordtype/")]
-        public List<RecordType> GetRecordTypes(string entityName)
+        public List<RecordMetadata> GetRecordTypes(string entityName)
         {
             DataService service = new DataService()
             {
@@ -49,7 +77,20 @@ namespace recore.web.Controllers
             };
             var command = new RetrieveAllRecordTypesCommand();
             var result = (RetrieveAllRecordTypesResult)service.Execute(command);
-            return result.RecordTypes;
+            var output = new List<RecordMetadata>(result.RecordTypes.Count);
+            foreach(var i in result.RecordTypes)
+            {
+                var tmp = new RecordMetadata()
+                {
+                    Name = i.TableName
+                };
+                foreach(var field in i.Fields)
+                {
+                    tmp.Fields.Add(field.Name, SerializeFieldMetadata(field));
+                }
+                output.Add(tmp);
+            }
+            return output;
         }
         [HttpGet]
         [Route("system/metadatadump")]
@@ -110,6 +151,7 @@ namespace recore.web.Controllers
             return new RecordFieldMetadata()
             {
                 Type = type.Name,
+                Nullable = field.Nullable,
                 Metadata = metadata,
             };
         }
@@ -128,12 +170,13 @@ namespace recore.web.Controllers
                 ["TextField"] = typeof(TextField),
             };
             var fieldType = fieldList[field.Type];
-            var createdField = Activator.CreateInstance(fieldType);
+            var createdField = (IFieldType)Activator.CreateInstance(fieldType);
             foreach(var f in field.Metadata)
             {
                 fieldType.GetField(f.Key).SetValue(createdField, ConvertFromString(fieldType.GetField(f.Key).FieldType, f.Value));
             }
-            return (IFieldType)createdField;
+            createdField.Nullable = field.Nullable;
+            return createdField;
         }
 
         private object ConvertFromString(Type type, string value)

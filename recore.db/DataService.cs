@@ -113,6 +113,13 @@ namespace recore.db
                     output =  new RetrieveAllRecordTypesResult() { RecordTypes = allTypes };
                     break;
                 }
+                case AddFieldToRecordTypeCommand _:
+                    {
+                        AddFieldToRecordTypeCommand castedCommand = (AddFieldToRecordTypeCommand)command;
+                        this.data.AddFieldToRecordType(castedCommand.RecordType, castedCommand.Field);
+                        output = new AddFieldToRecordTypeResult();
+                    }
+                    break;
                 default:
                 {
                     throw  new Exception("Unknown command");

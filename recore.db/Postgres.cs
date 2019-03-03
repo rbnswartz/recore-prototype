@@ -319,6 +319,35 @@ namespace recore.db
             return output;
         }
 
+        public RecordType RetrieveRecordType(string typeName)
+        {
+            string select = "select * from recordtype where tablename = @typeName";
+            NpgsqlCommand command = new NpgsqlCommand(select, this.connection);
+            command.Parameters.Add(CreateParameter("typeName", typeName));
+            NpgsqlDataReader reader = command.ExecuteReader();
+            reader.Read();
+            var recordType = this.ConvertDataRowToRecordTypes(reader);
+            reader.Close();
+            return recordType;
+        }
+
+        public void AddFieldToRecordType(string typeName, IFieldType field)
+        {
+            var recordType = this.RetrieveRecordType(typeName);
+            if (recordType.Fields.Exists(f => f.Name == field.Name))
+            {
+                throw new DuplicateNameException($"Record type {recordType} already has column {field.Name}");
+            }
+            recordType.Fields.Add(field);
+            string alterSql = $"alter table {typeName} add column {field.ToCreate()}";
+            NpgsqlCommand alterCommand = new NpgsqlCommand(alterSql, this.connection);
+            alterCommand.ExecuteNonQuery();
+            NpgsqlCommand updateRecordTypeCommand = new NpgsqlCommand($"update recordtype set Columns = @columns where recordtypeid = @recordtypeid", this.connection);
+            updateRecordTypeCommand.Parameters.Add(CreateParameter("columns", JsonConvert.SerializeObject(recordType.Fields, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Objects })));
+            updateRecordTypeCommand.Parameters.Add(CreateParameter("recordtypeid", recordType.RecordTypeId));
+            updateRecordTypeCommand.ExecuteNonQuery();
+        }
+
         private bool IsSafe(string input){
             Regex safeRegex = new Regex("^[a-zA-Z0-9_]*$");
             return safeRegex.IsMatch(input);
@@ -350,6 +379,27 @@ namespace recore.db
                 {
                     throw new Exception($"Field Name: {field.Name} is invalid");
                 }
+            }
+        }
+        private string GenerateFieldCreateSql(IFieldType field)
+        {
+            // There is probably a better way to do this but this is how things are currently
+            switch (field)
+            {
+                case BooleanField _:
+                    return $"{field.Name} boolean {(!field.Nullable ? "not null" : "")}";
+                case NumberField _:
+                    return $"{field.Name} integer" + (!field.Nullable ? "NOT NULL" : "") ;
+                case PrimaryField _:
+                    return $"{field.Name} uuid Not Null Primary Key";
+                case TextField _:
+                    TextField castedTextField = (TextField)field;
+                    return $"{castedTextField.Name} varchar({castedTextField.Length})" + (!castedTextField.Nullable ? "NOT NULL" : "") ;
+                case LookupField _:
+                    LookupField castedLookupField = (LookupField)field;
+                    return $"{field.Name} uuid references {castedLookupField.Target}({castedLookupField.Target}id) {(!field.Nullable ? "not null" : "")}";
+                default:
+                    throw new NotSupportedException($"Field type {field.GetType().Name} is unsupported by this backend");
             }
         }
     }
