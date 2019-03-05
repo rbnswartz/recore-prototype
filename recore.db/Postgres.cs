@@ -333,6 +333,11 @@ namespace recore.db
 
         public void AddFieldToRecordType(string typeName, IFieldType field)
         {
+            if (!IsSafe(field.Name))
+            {
+                throw new InvalidOperationException($"Field name {field.Name} is invalid");
+            }
+            // Possible the manipulation of the record type value should be moved up to the data service
             var recordType = this.RetrieveRecordType(typeName);
             if (recordType.Fields.Exists(f => f.Name == field.Name))
             {
@@ -340,6 +345,28 @@ namespace recore.db
             }
             recordType.Fields.Add(field);
             string alterSql = $"alter table {typeName} add column {field.ToCreate()}";
+            NpgsqlCommand alterCommand = new NpgsqlCommand(alterSql, this.connection);
+            alterCommand.ExecuteNonQuery();
+            NpgsqlCommand updateRecordTypeCommand = new NpgsqlCommand($"update recordtype set Columns = @columns where recordtypeid = @recordtypeid", this.connection);
+            updateRecordTypeCommand.Parameters.Add(CreateParameter("columns", JsonConvert.SerializeObject(recordType.Fields, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Objects })));
+            updateRecordTypeCommand.Parameters.Add(CreateParameter("recordtypeid", recordType.RecordTypeId));
+            updateRecordTypeCommand.ExecuteNonQuery();
+        }
+
+        public void RemoveFieldFromRecordType(string typeName, string fieldName)
+        {
+            if (!IsSafe(fieldName))
+            {
+                throw new InvalidOperationException($"Field name {fieldName} is invalid");
+            }
+            var recordType = this.RetrieveRecordType(typeName);
+            if (!recordType.Fields.Exists(f => f.Name == fieldName))
+            {
+                throw new MissingFieldException($"Record type {recordType.TableName} doesn't have the column {fieldName}");
+            }
+            recordType.Fields.Remove(recordType.Fields.First(f => f.Name == fieldName));
+
+            string alterSql = $"alter table {typeName} drop column {fieldName}";
             NpgsqlCommand alterCommand = new NpgsqlCommand(alterSql, this.connection);
             alterCommand.ExecuteNonQuery();
             NpgsqlCommand updateRecordTypeCommand = new NpgsqlCommand($"update recordtype set Columns = @columns where recordtypeid = @recordtypeid", this.connection);

@@ -24,5 +24,6 @@ namespace recore.db
         List<RecordType> RetrieveAllRecordTypes();
         RecordType RetrieveRecordType(string typeName);
         void AddFieldToRecordType(string typeName, IFieldType field);
+        void RemoveFieldFromRecordType(string typeName, string fieldName);
     }
 }

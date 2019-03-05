@@ -67,6 +67,70 @@ namespace recore.web.Controllers
             return true;
         }
 
+        [HttpDelete]
+        [Route("system/recordtype/{entityName}/fields/{fieldName}")]
+        public bool RemoveFieldFromRecordType(string entityName,string fieldName)
+        {
+            DataService service = new DataService()
+            {
+                data = new Postgres(connectionString),
+            };
+
+            RemoveFieldFromRecordTypeCommand command = new RemoveFieldFromRecordTypeCommand()
+            {
+                RecordType = entityName,
+                FieldName = fieldName,
+            };
+
+            service.Execute(command);
+            return true;
+        }
+
+        [HttpDelete]
+        [Route("system/recordtype/{entityName}")]
+        public bool DeleteRecordType(string entityName)
+        {
+            DataService service = new DataService()
+            {
+                data = new Postgres(connectionString),
+            };
+
+
+            var command = new DeleteRecordTypeCommand()
+            {
+                RecordType = entityName,
+            };
+
+            service.Execute(command);
+            return true;
+        }
+
+        [HttpPost]
+        [Route("system/recordtype/{entityName}")]
+        public bool CreateRecordType(string entityName, [FromBody] RecordMetadata recordType)
+        {
+            DataService service = new DataService()
+            {
+                data = new Postgres(connectionString),
+            };
+
+            RecordType createdType = new RecordType(recordType.Name, recordType.Name);
+            foreach(var field in recordType.Fields)
+            {
+                IFieldType tmp = DeserializeFieldMetadata(field.Value);
+                tmp.Name = field.Key;
+                createdType.Fields.Add(tmp);
+            }
+
+            var command = new CreateRecordTypeCommand()
+            {
+                Target = createdType
+            };
+
+            service.Execute(command);
+            return true;
+        }
+
         [HttpGet]
         [Route("system/recordtype/")]
         public List<RecordMetadata> GetRecordTypes(string entityName)
