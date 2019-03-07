@@ -25,7 +25,7 @@ namespace recore.web.Controllers
         }
 
         [HttpGet]
-        [Route("system/recordtype/{entityName}/fields")]
+        [Route("metadata/recordtype/{entityName}/fields")]
         public Dictionary<string,RecordFieldMetadata> GetFields(string entityName)
         {
             DataService service = new DataService()
@@ -46,7 +46,7 @@ namespace recore.web.Controllers
         }
 
         [HttpPost]
-        [Route("system/recordtype/{entityName}/fields/{fieldName}")]
+        [Route("metadata/recordtype/{entityName}/fields/{fieldName}")]
         public bool AddFieldToRecordType(string entityName,string fieldName, [FromBody]RecordFieldMetadata field)
         {
             DataService service = new DataService()
@@ -68,7 +68,7 @@ namespace recore.web.Controllers
         }
 
         [HttpDelete]
-        [Route("system/recordtype/{entityName}/fields/{fieldName}")]
+        [Route("metadata/recordtype/{entityName}/fields/{fieldName}")]
         public bool RemoveFieldFromRecordType(string entityName,string fieldName)
         {
             DataService service = new DataService()
@@ -87,7 +87,7 @@ namespace recore.web.Controllers
         }
 
         [HttpDelete]
-        [Route("system/recordtype/{entityName}")]
+        [Route("metadata/recordtype/{entityName}")]
         public bool DeleteRecordType(string entityName)
         {
             DataService service = new DataService()
@@ -106,7 +106,7 @@ namespace recore.web.Controllers
         }
 
         [HttpPost]
-        [Route("system/recordtype/{entityName}")]
+        [Route("metadata/recordtype/{entityName}")]
         public bool CreateRecordType(string entityName, [FromBody] RecordMetadata recordType)
         {
             DataService service = new DataService()
@@ -132,7 +132,7 @@ namespace recore.web.Controllers
         }
 
         [HttpGet]
-        [Route("system/recordtype/")]
+        [Route("metadata/recordtype/")]
         public List<RecordMetadata> GetRecordTypes(string entityName)
         {
             DataService service = new DataService()
@@ -157,7 +157,7 @@ namespace recore.web.Controllers
             return output;
         }
         [HttpGet]
-        [Route("system/metadatadump")]
+        [Route("metadata/metadatadump")]
         public List<RecordMetadata> MetadataDump()
         {
             DataService service = new DataService()
@@ -182,7 +182,7 @@ namespace recore.web.Controllers
             return output;
         }
         [HttpPost]
-        [Route("system/metadatadump")]
+        [Route("metadata/metadatadump")]
         public List<RecordMetadata> TestMetadataUpload([FromBody] List<RecordMetadata> input)
         {
             List<RecordMetadata> output = new List<RecordMetadata>();
@@ -247,7 +247,7 @@ namespace recore.web.Controllers
         {
             switch (type.Name)
             {
-                case "string":
+                case "String":
                     return value;
                 case "Int32":
                     return int.Parse(value);

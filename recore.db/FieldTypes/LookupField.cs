@@ -9,7 +9,7 @@ namespace recore.db.FieldTypes
     {
         public string Name { get; set; }
         public bool Nullable { get; set; }
-        public string Target { get; set; }
+        public string Target;
         public string Label { get; set; }
 
         public Type FieldType => typeof(Guid);

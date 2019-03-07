@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using recore.db;
 using recore.db.Commands;
 using recore.db.FieldTypes;
+using recore.web.Extension;
 using recore.web.Models;
 
 namespace recore.web.Controllers
@@ -20,6 +21,16 @@ namespace recore.web.Controllers
         }
         public IActionResult Index()
         {
+            return View();
+        }
+
+        public IActionResult Metadata()
+        {
+            DataService service = new DataService()
+            {
+                data = new Postgres(connectionString),
+            };
+            ViewData["sitemap"] = service.GetSiteMap();
             return View();
         }
 
