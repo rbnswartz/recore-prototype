@@ -1,0 +1,63 @@
+﻿
+@{
+    ViewData["Title"] = "Metadata";
+}
+
+<div class="card">
+    <div class = "card-header"><h5>Metadata</h5></div>
+    <div class="card-body">
+        Metadata stuff goes here
+        <div id="app">
+            {{text}}
+            <ul class="list-group">
+                <li class="list-group-item list-group-item-action" v-on:click ="getRecordTypeFields(type.name)" v-for="type in recordTypes">{{type.name}}</li>
+            </ul>
+            Fields<br/>
+            <ul class="list-group">
+                <li class="list-group-item" v-for="key in fields">{{key.name}} {{key.value.type}}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script src="~/js/vue.js"></script>
+<script type="text/javascript">
+    var app = new Vue({
+        el: "#app",
+        data: {
+            text: "Hello world",
+            recordTypes: [],
+            fields: [],
+        },
+        methods: {
+            getRecordTypeFields: function(recordTypeName) {
+                console.log("hit")
+                fetch("/metadata/recordtype/" + recordTypeName + "/fields").then((response) => {
+                    return response.json();
+                }).then((response) => {
+                    console.log(response);
+                    app.fields = [];
+                    for (var field in response) {
+                        app.fields.push({
+                            name: field,
+                            value: response[field]
+                        });
+                    }
+                });
+            },
+            say: function () {
+                console.log("Hello world");
+            }
+        },
+        beforeMount: function () {
+            fetch("/metadata/recordtype/").then((response) => {
+                return response.json();
+            }).then((response) => {
+                console.log(response);
+                app.recordTypes = response;
+            });
+        }
+    });
+</script>
+@section ButtonList {
+
+}

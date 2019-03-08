@@ -1,4 +1,5 @@
-﻿using System;
+﻿using recore.db.FieldTypes;
+using System;
 using System.Collections.Generic;
 
 namespace recore.db
@@ -21,5 +22,8 @@ namespace recore.db
         Record RetrieveRecord(string typeName, Guid id, List<string> columns);
         List<Record> RetrieveAllRecords(string typeName, List<string> columns);
         List<RecordType> RetrieveAllRecordTypes();
+        RecordType RetrieveRecordType(string typeName);
+        void AddFieldToRecordType(string typeName, IFieldType field);
+        void RemoveFieldFromRecordType(string typeName, string fieldName);
     }
 }

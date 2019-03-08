@@ -33,5 +33,24 @@ namespace recore.db.Commands
                 }
             }
         }
+        public object SafeGetValue(string key)
+        {
+            if (this.Data.ContainsKey(key))
+            {
+                return this.Data[key];
+            }
+            return null;
+        }
+        public void SafeSetValue(string key, object value)
+        {
+            if (this.Data.ContainsKey(key))
+            {
+                this.Data[key] = value;
+            }
+            else
+            {
+                this.Data.Add(key, value);
+            }
+        }
     }
 }

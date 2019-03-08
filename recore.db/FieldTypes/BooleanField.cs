@@ -20,5 +20,6 @@ namespace recore.db.FieldTypes
             this.Nullable = nullable;
             this.Name = name;
         }
+        public BooleanField() { }
     }
 }

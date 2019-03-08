@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using recore.db;
 using recore.db.Commands;
 using recore.db.FieldTypes;
+using recore.web.Extension;
 using recore.web.Models;
 
 namespace recore.web.Controllers
@@ -20,6 +21,16 @@ namespace recore.web.Controllers
         }
         public IActionResult Index()
         {
+            return View();
+        }
+
+        public IActionResult Metadata()
+        {
+            DataService service = new DataService()
+            {
+                data = new Postgres(connectionString),
+            };
+            ViewData["sitemap"] = service.GetSiteMap();
             return View();
         }
 
@@ -272,33 +283,6 @@ namespace recore.web.Controllers
             output["fields"] = JsonConvert.SerializeObject(fields);
             output["defaultform"] = true;
             return output;
-        }
-        [HttpGet]
-        [Route("system/recordtype/{entityName}/fields")]
-        public List<IFieldType> GetFields(string entityName)
-        {
-            DataService service = new DataService()
-            {
-                data = new Postgres(connectionString),
-            };
-            RetrieveRecordTypeCommand command = new RetrieveRecordTypeCommand()
-            {
-                RecordType = entityName,
-            };
-            var result = (RetrieveRecordTypeResult)service.Execute(command);
-            return result.Type.Fields;
-        }
-        [HttpGet]
-        [Route("system/recordtype/")]
-        public List<RecordType> GetRecordTypes(string entityName)
-        {
-            DataService service = new DataService()
-            {
-                data = new Postgres(connectionString),
-            };
-            var command = new RetrieveAllRecordTypesCommand();
-            var result = (RetrieveAllRecordTypesResult)service.Execute(command);
-            return result.RecordTypes;
         }
     }
 }
