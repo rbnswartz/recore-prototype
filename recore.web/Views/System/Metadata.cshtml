@@ -4,18 +4,92 @@
 }
 
 <div class="card">
-    <div class = "card-header"><h5>Metadata</h5></div>
+    <div class="card-header"><h5>Metadata</h5></div>
     <div class="card-body">
-        Metadata stuff goes here
         <div id="app">
-            {{text}}
-            <ul class="list-group">
-                <li class="list-group-item list-group-item-action" v-on:click ="getRecordTypeFields(type.name)" v-for="type in recordTypes">{{type.name}}</li>
-            </ul>
-            Fields<br/>
-            <ul class="list-group">
-                <li class="list-group-item" v-for="key in fields">{{key.name}} {{key.value.type}}</li>
-            </ul>
+            <div class="d-flex">
+                <div class="p-2">
+                    <div class="list-group">
+                        <a href="#" v-bind:class="['list-group-item','list-group-item-action', selectedType == type.name ? 'active' : '']" v-on:click="getRecordTypeFields(type.name)" v-for="type in recordTypes">{{type.name}}</a>
+                    </div>
+                </div>
+                <div class="p-2" v-show="selectedType != ''">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="key in fields">
+                                <td>
+                                    {{key.name}}
+                                </td>
+                                <td>
+                                    {{key.value.type}}
+                                </td>
+                                <td>
+                                    <div v-on:click="deleteField(key.name)" class="btn btn-danger">Delete Field</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <button v-show="selectedType != ''" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addField">
+                        Add new field
+                    </button>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="addField" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Add new field</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="newFieldType">Type</label>
+                                        <select v-model="newFieldType" class="form-control" id="newFieldType">
+                                            <option value="">---</option>
+                                            <option value="TextField">Text Field</option>
+                                            <option value="NumberField">Number Field</option>
+                                            <option value="GuidField">GUID Field</option>
+                                            <option value="LookupField">Lookup Field</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="newFieldName">Field Name</label>
+                                        <input v-model="newFieldName" id="newFieldName" class="form-control" type="text" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="newFieldNullable">Can be blank?</label>
+                                        <input v-model="newFieldNullable" id="newFieldNullable" class="form-control" type="checkbox" />
+                                    </div>
+                                    <div class="form-group" v-show="newFieldType == 'TextField'">
+                                        <label for="newFieldLength">Length</label>
+                                        <input v-model="newFieldLength" id="newFieldLength" class="form-control" type="number" />
+                                    </div>
+                                    <div class="form-group" v-show="newFieldType == 'LookupField'">
+                                        <label for="newFieldTarget">Target</label>
+                                        <select v-model="newFieldTarget" id="newFieldTarget">
+                                            <option v-for="type in recordTypes" v-bind:value="type.name">{{type.name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button" v-on:click="createNewField()" class="btn btn-primary">Create</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -27,10 +101,16 @@
             text: "Hello world",
             recordTypes: [],
             fields: [],
+            selectedType: "",
+            newFieldType: "",
+            newFieldName: "",
+            newFieldNullable: false,
+            newFieldLength: 100,
+            newFieldTarget: "",
         },
         methods: {
-            getRecordTypeFields: function(recordTypeName) {
-                console.log("hit")
+            getRecordTypeFields: function (recordTypeName) {
+                this.selectedType = recordTypeName;
                 fetch("/metadata/recordtype/" + recordTypeName + "/fields").then((response) => {
                     return response.json();
                 }).then((response) => {
@@ -44,8 +124,44 @@
                     }
                 });
             },
-            say: function () {
-                console.log("Hello world");
+            createNewField: function () {
+                var fieldToCreate = {
+                    type: this.newFieldType,
+                    nullable: this.newFieldNullable,
+                };
+                switch (this.newFieldType) {
+                    case "TextField":
+                        fieldToCreate.metadata = {
+                            Length: this.newFieldLength,
+                        };
+                        break;
+                    case "LookupField":
+                        fieldToCreate.metadata = {
+                            Target: this.newFieldTarget,
+                        };
+                        break;
+                }
+                fetch("/metadata/recordtype/" + this.selectedType + "/fields/" + this.newFieldName, {
+                    method: "POST", body: JSON.stringify(fieldToCreate), headers: { "Content-Type": "application/json" }
+                }).then((response) => {
+                    app.clearNewModal();
+                    app.getRecordTypeFields(this.selectedType);
+                    $('#addField').modal('hide')
+                });
+            },
+            clearNewModal: function () {
+                this.newFieldType = "";
+                this.newFieldNullable = false;
+                this.newFieldName = "";
+                this.newFieldLength = 100;
+                this.newFieldTarget = "";
+            },
+            deleteField: function (fieldName) {
+                fetch("/metadata/recordtype/" + this.selectedType + "/fields/" + fieldName, {
+                    method: "DELETE"
+                }).then((response) => {
+                    app.getRecordTypeFields(this.selectedType);
+                });
             }
         },
         beforeMount: function () {
