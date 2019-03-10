@@ -205,6 +205,10 @@ namespace recore.db
                 {
                     output.Id = (Guid)reader[field];
                 }
+                if (reader[field] is DBNull)
+                {
+                    continue;
+                }
                 output.Data.Add(field, reader[field]);
             }
             return output;
