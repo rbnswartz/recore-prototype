@@ -12,9 +12,13 @@
                     <div class="list-group">
                         <a href="#" v-bind:class="['list-group-item','list-group-item-action', selectedType == type.name ? 'active' : '']" v-on:click="getRecordTypeFields(type.name)" v-for="type in recordTypes">{{type.name}}</a>
                     </div>
+                    <br/>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addNewRecordType">
+                        Add new record type
+                    </button>
                 </div>
                 <div class="p-2" v-show="selectedType != ''">
-                    <table class="table">
+                    <table class="table table-bordered">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -40,8 +44,13 @@
                     <button v-show="selectedType != ''" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addField">
                         Add new field
                     </button>
+                    <button v-show="selectedType != ''" type="button" class="btn btn-danger" v-on:click="deleteRecordType()">
+                        Delete Record Type
+                    </button>
 
-                    <!-- Modal -->
+                </div>
+            </div>
+                    <!-- Modals -->
                     <div class="modal fade" id="addField" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
@@ -88,8 +97,28 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                    <div class="modal fade" id="addNewRecordType" tabindex="-1" role="dialog" aria-labelledby="addRecordType" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Add new recod type</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="newRecordTypeName">Name</label>
+                                        <input v-model="newRecordTypeName" id="newRecordTypeName" class="form-control" type="text" />
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button" v-on:click="createNewRecordType()" class="btn btn-primary">Create</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
         </div>
     </div>
 </div>
@@ -107,6 +136,7 @@
             newFieldNullable: false,
             newFieldLength: 100,
             newFieldTarget: "",
+            newRecordTypeName: "",
         },
         methods: {
             getRecordTypeFields: function (recordTypeName) {
@@ -144,17 +174,33 @@
                 fetch("/metadata/recordtype/" + this.selectedType + "/fields/" + this.newFieldName, {
                     method: "POST", body: JSON.stringify(fieldToCreate), headers: { "Content-Type": "application/json" }
                 }).then((response) => {
-                    app.clearNewModal();
+                    app.clearNewFieldModal();
                     app.getRecordTypeFields(this.selectedType);
                     $('#addField').modal('hide')
                 });
             },
-            clearNewModal: function () {
+            clearNewFieldModal: function () {
                 this.newFieldType = "";
                 this.newFieldNullable = false;
                 this.newFieldName = "";
                 this.newFieldLength = 100;
                 this.newFieldTarget = "";
+            },
+            clearNewRecordTypeModal: function () {
+                this.newRecordTypeName = "";
+            },
+            createNewRecordType: function () {
+                fetch("/metadata/recordtype/" + this.newRecordTypeName, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({Name:this.newRecordTypeName}),
+                }).then((response) => {
+                    this.getRecordTypes();
+                    this.clearNewRecordTypeModal();
+                    $('#addNewRecordType').modal('hide')
+                });
             },
             deleteField: function (fieldName) {
                 fetch("/metadata/recordtype/" + this.selectedType + "/fields/" + fieldName, {
@@ -162,15 +208,27 @@
                 }).then((response) => {
                     app.getRecordTypeFields(this.selectedType);
                 });
+            },
+            getRecordTypes: function () {
+                fetch("/metadata/recordtype/").then((response) => {
+                    return response.json();
+                }).then((response) => {
+                    console.log(response);
+                    app.recordTypes = response;
+                    this.selectedType = "";
+                });
+            },
+            deleteRecordType: function () {
+                fetch("/metadata/recordtype/" + this.selectedType, {
+                    method: "DELETE"
+                }).then((response) => {
+                    this.selectedType = "";
+                    this.getRecordTypes();
+                });
             }
         },
         beforeMount: function () {
-            fetch("/metadata/recordtype/").then((response) => {
-                return response.json();
-            }).then((response) => {
-                console.log(response);
-                app.recordTypes = response;
-            });
+            this.getRecordTypes();
         }
     });
 </script>

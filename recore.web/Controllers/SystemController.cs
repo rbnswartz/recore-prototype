@@ -92,6 +92,7 @@ namespace recore.web.Controllers
                     new TextField("definition", 10000, false),
                 }
             };
+
             RecordType ViewComponent = new RecordType("View Component", "viewcomponent")
             {
                 Fields = new List<IFieldType>()
@@ -100,8 +101,7 @@ namespace recore.web.Controllers
                     new TextField("definition", 10000, false),
                 }
             };
-            var formForm = GenerateFormForRecordType(Form);
-            var viewForm = GenerateFormForRecordType(View);
+
             List<Record> forms = new List<Record>(){
                 GenerateFormForRecordType(Sitemap),
                 GenerateFormForRecordType(Log),
@@ -120,8 +120,9 @@ namespace recore.web.Controllers
                 service.Execute(new CreateRecordCommand{ Target = form});
             }
 
-            var formResult = (CreateRecordResult)service.Execute(new CreateRecordCommand{ Target = formForm});
-            var viewResult = (CreateRecordResult)service.Execute(new CreateRecordCommand{ Target = viewForm});
+            var formResult = (CreateRecordResult)service.Execute(new CreateRecordCommand{ Target = GenerateFormForRecordType(Form)});
+            var viewResult = (CreateRecordResult)service.Execute(new CreateRecordCommand{ Target = GenerateFormForRecordType(View)});
+            var sitemapResult = (CreateRecordResult)service.Execute(new CreateRecordCommand { Target = GenerateFormForRecordType(Sitemap) });
 
 
             // Create some of the base UI
@@ -147,8 +148,24 @@ namespace recore.web.Controllers
                     new RecoreFormField { Field = "label", Label = "Label", FieldType = "text-field" },
                     new RecoreFormField { Field = "recordtype", Label = "Record Type", FieldType = "text-field" }}),
             };
+
+            // Sitemap view
+            Record siteMapView = new Record("view")
+            {
+                ["label"] = "Sitemap",
+                ["recordtype"] = "sitemap",
+                ["contents"] = JsonConvert.SerializeObject(new List<RecoreFormField>() {
+                    new RecoreFormField { Field = "sitemapid", Label = "Edit", FieldType = "form-link", Config= new Dictionary<string, string> { { "formid", sitemapResult.RecordId.ToString() } } },
+                    new RecoreFormField { Field = "sitemapid", Label = "Sitemap Id", FieldType = "text-field" },
+                    new RecoreFormField { Field = "label", Label = "Label", FieldType = "text-field" },
+                    new RecoreFormField { Field = "type", Label = "Type", FieldType = "text-field" },
+                    new RecoreFormField { Field = "url", Label = "Url", FieldType = "text-field" },
+                    new RecoreFormField { Field = "recordtype", Label = "Record Type", FieldType = "text-field" }}),
+            };
+
             Guid formViewId = ((CreateRecordResult)service.Execute(new CreateRecordCommand { Target = formView })).RecordId;
             Guid viewViewId = ((CreateRecordResult)service.Execute(new CreateRecordCommand { Target = viewView })).RecordId;
+            Guid sitemapViewId = ((CreateRecordResult)service.Execute(new CreateRecordCommand { Target = siteMapView })).RecordId;
 
             Record formViewSitemap = new Record("sitemap")
             {
@@ -166,8 +183,17 @@ namespace recore.web.Controllers
                 ["recordtype"] = "view",
             };
 
+            Record sitemapViewSitemap = new Record("sitemap")
+            {
+                ["label"] = "Sitemap",
+                ["type"] = "view",
+                ["url"] = sitemapViewId.ToString(),
+                ["recordtype"] = "sitemap",
+            };
+
             service.Execute(new CreateRecordCommand { Target = formViewSitemap });
             service.Execute(new CreateRecordCommand { Target = viewViewSitemap });
+            service.Execute(new CreateRecordCommand { Target = sitemapViewSitemap });
 
             CreateFormComponents(service);
             CreateViewComponents(service);
@@ -267,22 +293,40 @@ namespace recore.web.Controllers
         }
         Record GenerateFormForRecordType(RecordType type)
         {
+            string[] ignoredFields = {type.TableName + "Id", "modifiedon", "createdon"};
             Record output = new Record(){Type = "form"};
             output["name"] = "Main";
             output["recordtype"] = type.TableName;
             List<RecoreFormField> fields = new List<RecoreFormField>();
             foreach(var field in type.Fields)
             {
+                if (ignoredFields.Contains(field.Name))
+                {
+                    continue;
+                }
                 fields.Add(new RecoreFormField {
                     Name = field.Name,
                     Field = field.Name,
                     Label = field.Name,
-                    FieldType = "text-field"
+                    FieldType = FigureOutFormFieldType(field),
                 });
             }
             output["fields"] = JsonConvert.SerializeObject(fields);
             output["defaultform"] = true;
             return output;
+        }
+
+        string FigureOutFormFieldType(IFieldType field)
+        {
+            switch (field)
+            {
+                case NumberField _:
+                    return "number-field";
+                case BooleanField _:
+                    return "boolean-field";
+                default:
+                    return "text-field";
+            }
         }
     }
 }
