@@ -79,7 +79,7 @@
             },
             LoadForm() {
                 var request = new XMLHttpRequest();
-                request.open("GET", "/data/" + this.recordType + "/" + this.recordId + "?columns=" + this.GetFormFields().join(","));
+                request.open("GET", "http://localhost:55903/data/" + this.recordType + "/" + this.recordId + "?columns=" + this.GetFormFields().join(","));
                 request.onload = function () {
                     if (request.status >= 200 && request.status < 300) {
                         app.model = JSON.parse(request.responseText).data;

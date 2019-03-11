@@ -120,7 +120,9 @@ namespace recore.web.Controllers
                 service.Execute(new CreateRecordCommand{ Target = form});
             }
 
-            var formResult = (CreateRecordResult)service.Execute(new CreateRecordCommand{ Target = GenerateFormForRecordType(Form)});
+            var formResult = (CreateRecordResult)service.Execute(new CreateRecordCommand{ Target = GenerateFormForRecordType(Form, new Dictionary<string, RecoreFormField>() {
+                ["recordtype"] = new RecoreFormField { Name = "recordtype", Field = "recordtype", FieldType = "recordtype-field", Label="Record Type"}
+            })});
             var viewResult = (CreateRecordResult)service.Execute(new CreateRecordCommand{ Target = GenerateFormForRecordType(View)});
             var sitemapResult = (CreateRecordResult)service.Execute(new CreateRecordCommand { Target = GenerateFormForRecordType(Sitemap) });
 
@@ -191,9 +193,17 @@ namespace recore.web.Controllers
                 ["recordtype"] = "sitemap",
             };
 
+            Record metadataSitemap = new Record("sitemap")
+            {
+                ["label"] = "Metadata Editor",
+                ["type"] = "url",
+                ["url"] = "/System/Metadata",
+            };
+
             service.Execute(new CreateRecordCommand { Target = formViewSitemap });
             service.Execute(new CreateRecordCommand { Target = viewViewSitemap });
             service.Execute(new CreateRecordCommand { Target = sitemapViewSitemap });
+            service.Execute(new CreateRecordCommand { Target = metadataSitemap });
 
             CreateFormComponents(service);
             CreateViewComponents(service);
@@ -286,12 +296,46 @@ namespace recore.web.Controllers
                 });
                 ",
             };
+
+            Record recordTypeLookupField = new Record("formcomponent"){
+                ["name"] = "recordtype-field",
+                ["definition"] = @"
+    Vue.component('recordtype-field', {
+        props: ['label', 'name', 'value', 'config'],
+        data: function(){
+            return {
+                recordTypes:[]
+            };
+        },
+        mounted: function(){
+            var self = this;
+            fetch('/metadata/recordtype')
+            .then(function(stream) { 
+                return stream.json()
+            })
+            .then(function(response) {
+                console.log(response);
+                response.forEach(i => {
+                    self.recordTypes.push(i.name);
+                });
+            });
+        },
+        template: `<div class=""form-group"">
+            <label v-bind:for=""name"">{{label}}</label>
+            <select class=""form-control"" type =""checkbox"" v-bind:id=""name"" v-bind:checked=""value"" v-on:input=""$emit(\'recorechange\', $event.target.value)"">
+                <option v-for=""type in recordTypes"" v-bind:value=""type"">{{type}}</option>
+            </select>
+            </div>`
+    });",
+            };
+
             service.Execute(new CreateRecordCommand() { Target = textField });
             service.Execute(new CreateRecordCommand() { Target = numberField });
             service.Execute(new CreateRecordCommand() { Target = booleanField });
             service.Execute(new CreateRecordCommand() { Target = textareaField });
+            service.Execute(new CreateRecordCommand() { Target = recordTypeLookupField });
         }
-        Record GenerateFormForRecordType(RecordType type)
+        Record GenerateFormForRecordType(RecordType type, Dictionary<string, RecoreFormField> overrides = null)
         {
             string[] ignoredFields = {type.TableName + "Id", "modifiedon", "createdon"};
             Record output = new Record(){Type = "form"};
@@ -302,6 +346,11 @@ namespace recore.web.Controllers
             {
                 if (ignoredFields.Contains(field.Name))
                 {
+                    continue;
+                }
+                if (overrides != null && overrides.ContainsKey(field.Name))
+                {
+                    fields.Add(overrides[field.Name]);
                     continue;
                 }
                 fields.Add(new RecoreFormField {
