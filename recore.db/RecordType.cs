@@ -26,10 +26,10 @@ namespace recore.db
             this.Fields = new List<IFieldType>();
         }
         
-        public string Name;
-        public Guid RecordTypeId;
-        public string TableName;
-        public List<IFieldType> Fields;
+        public string Name { get; set; }
+        public Guid RecordTypeId { get; set; }
+        public string TableName { get; set; }
+        public List<IFieldType> Fields { get; set; }
 
         public List<string> FieldNames => Fields.Select(f => f.Name).ToList();
     }

@@ -4,6 +4,7 @@ using recore.db;
 using recore.db.FieldTypes;
 using recore.db.Commands;
 using System.Linq;
+using recore.db.Query;
 
 namespace recore
 {
@@ -35,37 +36,51 @@ namespace recore
                 }
             };
             CreateRecordResult createResult = (CreateRecordResult)service.Execute(new CreateRecordCommand() { Target = firstCustomer });
-            Record newLog = new Record()
-            {
-                Type = "log",
-                Data = new Dictionary<string, object>()
-                {
-                    ["name"] = "First ever log!",
-                    ["number"] = 123,
-                    ["customer"] = createResult.RecordId,
-                }
-            };
             
-            CreateRecordCommand com = new CreateRecordCommand()
-            {
-                Target = newLog,
-            };
-
-            CreateRecordResult result = (CreateRecordResult)service.Execute(com);
-            
-            Console.WriteLine(result.RecordId);
-            Record createdRecord = ((RetrieveRecordResult)service.Execute(new RetrieveRecordCommand(){AllFields = true, Id = result.RecordId, Type = "log"})).Result;
+            Record createdRecord = ((RetrieveRecordResult)service.Execute(new RetrieveRecordCommand(){AllFields = true, Id = createResult.RecordId, Type = "customer"})).Result;
             foreach (var item in createdRecord.Data)
             {
                 Console.WriteLine($"{item.Key}:{item.Value}");
             }
+
+            BasicQuery query = new BasicQuery()
+            {
+                RecordType = "customer",
+                Columns = new List<string>() { "name" },
+                Filters = new List<QueryFilter>()
+                {
+                    new QueryFilter()
+                    {
+                        Column = "name",
+                        Operation = FilterOperation.Null
+                    },
+                    new QueryFilter()
+                    {
+                        Column = "name",
+                        Operation = FilterOperation.NotNull
+                    }
+                },
+                Orderings = new List<QueryOrdering>()
+                {
+                    new QueryOrdering()
+                    {
+                        Column = "name",
+                        Descending = false,
+                    }
+                }
+            };
+
+            QueryRecordsCommand queryCommand = new QueryRecordsCommand() { Query = query };
+
+            var queryResult = (QueryRecordsResult)service.Execute(queryCommand);
+            Console.WriteLine(queryResult.Result.Count);
+
             var allTypes = data.GetAllTypes().ToList();
             allTypes.Reverse();
             foreach (var type in allTypes)
             {
                 data.DeleteRecordType(type.RecordTypeId);
             }
-            
             
             
             Console.WriteLine("All done");

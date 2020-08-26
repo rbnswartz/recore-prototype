@@ -7,6 +7,7 @@ using System.Text;
 using recore.db.FieldTypes;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
+using recore.db.Query;
 
 namespace recore.db
 {
@@ -63,6 +64,7 @@ namespace recore.db
         {
             List<RecordType> output = new List<RecordType>();
             NpgsqlCommand getTypes = new NpgsqlCommand("select RecordTypeId, Name, TableName, Columns from recordtype", this.connection);
+            this.Open();
             var reader = getTypes.ExecuteReader();
             while (reader.Read())
             {
@@ -432,6 +434,110 @@ namespace recore.db
                 default:
                     throw new NotSupportedException($"Field type {field.GetType().Name} is unsupported by this backend");
             }
+        }
+
+        private NpgsqlCommand CreateCommandForQuery(BasicQuery query)
+        {
+            NpgsqlCommand command = new NpgsqlCommand()
+            {
+                Connection = this.connection
+            };
+            StringBuilder queryText = new StringBuilder();
+            queryText.Append("select ");
+            queryText.AppendJoin(',', query.Columns);
+            queryText.Append($" from {query.RecordType}");
+            if (query.Filters.Count != 0)
+            {
+                queryText.Append(" where ");
+                for (int i = 0; i < query.Filters.Count; i++)
+                {
+                    var filter = query.Filters[i];
+                    switch (filter.Operation)
+                    {
+                        case FilterOperation.Equal:
+                            queryText.Append($"{filter.Column} = @{i}");
+                            break;
+                        case FilterOperation.GreaterThan:
+                            queryText.Append($"{filter.Column} > @{i}");
+                            break;
+                        case FilterOperation.LessThan:
+                            queryText.Append($"{filter.Column} < @{i}");
+                            break;
+                        case FilterOperation.NotEqual:
+                            queryText.Append($"{filter.Column} <> @{i}");
+                            break;
+                        case FilterOperation.Null:
+                            queryText.Append($"{filter.Column} is NULL");
+                            break;
+                        case FilterOperation.NotNull:
+                            queryText.Append($"{filter.Column} is not NULL");
+                            break;
+                        default:
+                            throw new NotSupportedException($"Operator {filter.Operation} is not supported");
+                    }
+
+                    if (!(filter.Operation == FilterOperation.NotNull || filter.Operation == FilterOperation.Null))
+                    {
+                        command.Parameters.Add(CreateParameter(i.ToString(), filter.Value));
+                    }
+
+                    // TODO: This is hardcoded to and. Should be changed in the future
+                    if (i != query.Filters.Count - 1)
+                    {
+                        queryText.Append(" and ");
+                    }
+                }
+            }
+            if(query.Orderings.Count != 0)
+            {
+                var convertedOrders = query.Orderings.Select(i => $"{i.Column} {(i.Descending ? "desc" : "asc")}");
+                queryText.Append($" order by {(string.Join(',', convertedOrders))}");
+            }
+            Console.WriteLine("Executing query " + queryText.ToString());
+            command.CommandText = queryText.ToString();
+            return command;
+        }
+
+        public List<Record> Query(BasicQuery query)
+        {
+            if (!IsSafe(query.RecordType))
+            {
+                throw new NotSupportedException($"Query target name {query.RecordType} is unsafe");
+            }
+
+            foreach(var column in query.Columns)
+            {
+                if (!IsSafe(column))
+                {
+                    throw new NotSupportedException($"Query column name {column} is unsafe");
+                }
+            }
+
+            foreach(var filter in query.Filters)
+            {
+                if (!IsSafe(filter.Column))
+                {
+                    throw new NotSupportedException($"Query filter column name {filter} is unsafe");
+                }
+            }
+
+            
+            foreach(var order in query.Orderings)
+            {
+                if (!IsSafe(order.Column))
+                {
+                    throw new NotSupportedException($"Ordering column name {order.Column} is unsafe");
+                }
+            }
+
+            List<Record> output = new List<Record>();
+            NpgsqlCommand command = CreateCommandForQuery(query);
+            NpgsqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                output.Add(this.ReadToRecord(reader, EnsureIdColumn(query.Columns, query.RecordType), query.RecordType));
+            }
+            return output;
         }
     }
 }

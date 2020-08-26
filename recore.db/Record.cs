@@ -14,9 +14,9 @@ namespace recore.db
             Data = new Dictionary<string, object>();
             Type = recordType;
         }
-        public Guid Id;
-        public string Type;
-        public Dictionary<string, object> Data;
+        public Guid Id { get; set; }
+        public string Type { get; set; }
+        public Dictionary<string, object> Data { get; set; }
 
         public object this[string key]
         {

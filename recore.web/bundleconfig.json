@@ -9,9 +9,17 @@
     ]
   },
   {
+    "outputFileName": "wwwroot/js/base-form-components.js",
+    // An array of relative input file paths. Globbing patterns supported
+    "inputFiles": [
+      "js/base-form-components.js"
+    ]
+  },
+  {
     "outputFileName": "wwwroot/js/site.min.js",
     "inputFiles": [
-      "wwwroot/js/site.js"
+      "wwwroot/js/site.js",
+      "js/test.js"
     ],
     // Optionally specify minification options
     "minify": {
@@ -19,6 +27,6 @@
       "renameLocals": true
     },
     // Optionally generate .map file
-    "sourceMap": false
+    "sourceMap": true
   }
 ]

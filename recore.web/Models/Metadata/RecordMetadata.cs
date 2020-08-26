@@ -7,8 +7,8 @@ namespace recore.web.Models.Metadata
 {
     public class RecordMetadata
     {
-        public string Name;
-        public Dictionary<string, RecordFieldMetadata> Fields;
+        public string Name { get; set; }
+        public Dictionary<string, RecordFieldMetadata> Fields { get; set; }
 
         public RecordMetadata()
         {

@@ -18,6 +18,10 @@
     </form>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+@foreach(var script in (List<string>)ViewData["scriptstoload"])
+{
+    <script src="@script"></script>
+}
 <script type="text/javascript">
     @foreach(string component in (IEnumerable<string>)ViewData["components"])
     {

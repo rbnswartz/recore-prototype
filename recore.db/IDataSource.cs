@@ -1,4 +1,5 @@
 ﻿using recore.db.FieldTypes;
+using recore.db.Query;
 using System;
 using System.Collections.Generic;
 
@@ -25,5 +26,7 @@ namespace recore.db
         RecordType RetrieveRecordType(string typeName);
         void AddFieldToRecordType(string typeName, IFieldType field);
         void RemoveFieldFromRecordType(string typeName, string fieldName);
+
+        List<Record> Query(BasicQuery query);
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using recore.db.Commands;
 using recore.db.FieldTypes;
+using recore.db.Query;
 
 namespace recore.db
 {
@@ -13,6 +14,7 @@ namespace recore.db
         {
             data.Open();
             ResultBase output = null;
+            
             switch (command)
             {
                 case CreateRecordCommand _:
@@ -44,7 +46,7 @@ namespace recore.db
                         List<string> fieldsToGet;
                         if (retrieveCommand.AllFields)
                         {
-                            fieldsToGet = type.FieldNames;
+                            fieldsToGet = EnsureIdColumn(type.FieldNames, retrieveCommand.Type);
                         }
                         else
                         {
@@ -78,11 +80,13 @@ namespace recore.db
                         {
                             retreiveCommand.Columns = new List<string>();
                         }
-                        var result = this.data.RetrieveAllRecords(retreiveCommand.RecordType, retreiveCommand.Columns);
-                        if (result == null)
+                        BasicQuery query = new BasicQuery()
                         {
-                            result = new List<Record>();
-                        }
+                            Columns = EnsureIdColumn(retreiveCommand.Columns, retreiveCommand.RecordType),
+                            RecordType = retreiveCommand.RecordType,
+                            
+                        };
+                        var result = this.data.Query(query);
                         output = new RetrieveAllResult() { Result = result };
                         break;
                     }
@@ -131,6 +135,14 @@ namespace recore.db
                         this.data.DeleteRecordType(recordType.RecordTypeId);
                         break;
                     }
+                case QueryRecordsCommand castedCommand:
+                    {
+                        var query = castedCommand.Query;
+                        query.Columns = EnsureIdColumn(query.Columns, query.RecordType);
+                        var result = this.data.Query(query);
+                        output = new QueryRecordsResult() { Result = result };
+                        break;
+                    }
                 default:
                     {
                         throw new Exception("Unknown command");
@@ -138,6 +150,14 @@ namespace recore.db
             }
             data.Close();
             return output;
+        }
+        private List<string> EnsureIdColumn(List<string> input, string typeName)
+        {
+            if (!input.Contains(typeName + "id"))
+            {
+                input.Add(typeName + "id");
+            }
+            return input;
         }
     }
 }

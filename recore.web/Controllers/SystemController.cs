@@ -89,7 +89,8 @@ namespace recore.web.Controllers
                 Fields = new List<IFieldType>()
                 {
                     new TextField("name", 100, false),
-                    new TextField("definition", 10000, false),
+                    new TextField("definition", 10000, true),
+                    new TextField("url", 200, true),
                 }
             };
 
@@ -328,12 +329,17 @@ namespace recore.web.Controllers
             </div>`
     });",
             };
+            Record testField = new Record("formcomponent") {
+                ["name"] = "test-field",
+                ["url"] = "/js/base-form-components.js",
+            };
 
             service.Execute(new CreateRecordCommand() { Target = textField });
             service.Execute(new CreateRecordCommand() { Target = numberField });
             service.Execute(new CreateRecordCommand() { Target = booleanField });
             service.Execute(new CreateRecordCommand() { Target = textareaField });
             service.Execute(new CreateRecordCommand() { Target = recordTypeLookupField });
+            service.Execute(new CreateRecordCommand() { Target = testField });
         }
         Record GenerateFormForRecordType(RecordType type, Dictionary<string, RecoreFormField> overrides = null)
         {

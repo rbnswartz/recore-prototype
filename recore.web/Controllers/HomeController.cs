@@ -23,6 +23,7 @@ namespace recore.web.Controllers
             {
                 data = new Postgres(connectionString),
             };
+
             ViewData["sitemap"] = service.GetSiteMap();
             return View();
         }

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+   <div id="app">
+        <test-field label="Label" name="Name" v-bind:fielddata="model.field" v-on:recorechange="model.field = $event" v-bind:config="{formid : '82669446-5a7d-4e7d-9da8-5467e9aa5b27'}"></test-field>
+   </div> 
+   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+   <script type="text/javascript">
+    Vue.component('test-field', {
+        props: ['label', 'name', 'value', 'config'],
+        data: function(){
+            return {
+                recordTypes:[]
+            };
+        },
+        mounted: function(){
+            var self = this;
+            fetch("/metadata/recordtype")
+            .then(function(stream) { 
+                return stream.json()
+            })
+            .then(function(response) {
+                console.log(response);
+                response.forEach(i => {
+                    console.log(i);
+                    self.recordTypes.push(i.name);
+                });
+                console.log(self.recordTypes);
+            });
+        },
+        template: `<div class="form-group">
+            <label v-bind:for="name">{{label}}</label>
+            <select class="form-control" type ="checkbox" v-bind:id="name" v-bind:checked="value" v-on:input="$emit(\'recorechange\', $event.target.value)">
+                <option v-for="type in recordTypes" v-bind:value="type">{{type}}</option>
+            </select>
+            </div>`
+    });
+
+    var app = new Vue({
+        el: "#app",
+        data: {
+            fields: [
+                    {
+                        field: 'test',
+                        name: 'test'
+                    },
+            ],
+            recordType:'test', 
+            recordId: '',
+            model: {},
+        },
+        methods: {
+            SubmitForm() {
+                    var request = new XMLHttpRequest();
+                    if (this.recordId == '') {
+                        request.open("POST", "http://localhost:5593/data/" + this.recordType + "/");
+                    }
+                    else {
+                        request.open("PATCH", "http://localhost:5593/data/" + this.recordType + "/" + this.recordId + "/");
+                    }
+                    request.setRequestHeader("Content-Type", "application/json");
+                    request.onload = function () {
+                        if (request.status >= 200 && request.status < 300) {
+                            if (this.recordId === '') {
+                                this.recordId = JSON.parse(request.responseText);
+                            }
+                            window.location.href="http://localhost:5593/Form/@Model.FormId/" + app.recordId
+                        }
+                        else {
+                            alert(request.responseText);
+                        }
+                    }
+                    var send = {};
+                    this.fields.forEach(function (field) {
+                        send[field.field] = app.model[field.field];
+                    });
+                    request.send(JSON.stringify({ data: send }));
+            },
+            GetFormFields() {
+                var output = [];
+                this.fields.forEach(function (field) {
+                    if (output.indexOf(field.field) == -1) {
+                        output.push(field.field);
+                    }
+                });
+                return output;
+            },
+            LoadForm() {
+                var request = new XMLHttpRequest();
+                request.open("GET", "http://localhost:5593/data/" + this.recordType + "/" + this.recordId + "?columns=" + this.GetFormFields().join(","));
+                request.onload = function () {
+                    if (request.status >= 200 && request.status < 300) {
+                        app.model = JSON.parse(request.responseText).data;
+                    }
+                    else {
+                        alert(request.responseText);
+                    }
+
+                }
+                request.send();
+            }
+        },
+        mounted: function () {
+            if (this.recordId != '') {
+                this.LoadForm();
+            }
+        },
+    });
+
+   </script>
+</body>
+</html>
