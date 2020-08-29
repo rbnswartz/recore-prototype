@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using recore.db;
 using recore.db.Commands;
@@ -373,15 +374,12 @@ namespace recore.web.Controllers
 
         string FigureOutFormFieldType(IFieldType field)
         {
-            switch (field)
+            return field switch
             {
-                case NumberField _:
-                    return "number-field";
-                case BooleanField _:
-                    return "boolean-field";
-                default:
-                    return "text-field";
-            }
+                NumberField _ => "number-field",
+                BooleanField _ => "boolean-field",
+                _ => "text-field",
+            };
         }
     }
 }

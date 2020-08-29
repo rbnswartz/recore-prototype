@@ -15,10 +15,6 @@ namespace recore.web
     {
         public static void Main(string[] args)
         {
-            DataService dataService = new DataService()
-            {
-                data = new Postgres(Configurationmanager)
-            }
             BuildWebHost(args).Run();
         }
 
