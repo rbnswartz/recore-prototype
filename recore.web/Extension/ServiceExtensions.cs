@@ -10,7 +10,7 @@ namespace recore.web.Extension
 {
     public static class ServiceExtensions
     {
-        public static List<SitemapItem> GetSiteMap(this DataService service)
+        public static List<SitemapItem> GetSiteMap(this IDataService service)
         {
             List<SitemapItem> output = new List<SitemapItem>();
             RetrieveAllCommand getAll = new RetrieveAllCommand()
@@ -26,7 +26,7 @@ namespace recore.web.Extension
             return output;
         }
 
-        public static RecoreView GetView(this DataService service, Guid viewId)
+        public static RecoreView GetView(this IDataService service, Guid viewId)
         {
             RetrieveRecordCommand getAll = new RetrieveRecordCommand()
             {
@@ -38,7 +38,7 @@ namespace recore.web.Extension
             return new RecoreView(result.Result);
         }
 
-        public static RecoreForm GetForm(this DataService service, Guid formId)
+        public static RecoreForm GetForm(this IDataService service, Guid formId)
         {
             RetrieveRecordCommand getAll = new RetrieveRecordCommand()
             {
@@ -50,7 +50,7 @@ namespace recore.web.Extension
             return new RecoreForm(result.Result);
         }
 
-        public static RecoreForm GetDefaultForm(this DataService service, string recordType)
+        public static RecoreForm GetDefaultForm(this IDataService service, string recordType)
         {
             RetrieveAllCommand getAll = new RetrieveAllCommand()
             {

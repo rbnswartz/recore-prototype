@@ -14,6 +14,11 @@ namespace recore.db.FieldTypes
         public Type FieldType => typeof(DateTime);
         public string Name { get; set; }
         public string Label { get; set; }
-        public DateField() { }
+        public DateField(string name, bool nullable) 
+        {
+            Name = name;
+            Nullable = nullable;
+
+        }
     }
 }

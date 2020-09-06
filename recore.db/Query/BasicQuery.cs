@@ -12,6 +12,13 @@ namespace recore.db.Query
             Filters = new List<QueryFilter>();
             Orderings = new List<QueryOrdering>();
         }
+        public BasicQuery(string recordType)
+        {
+            this.RecordType = recordType;
+            Columns = new List<string>();
+            Filters = new List<QueryFilter>();
+            Orderings = new List<QueryOrdering>();
+        }
         public string RecordType;
         public List<string> Columns;
         public List<QueryFilter> Filters;

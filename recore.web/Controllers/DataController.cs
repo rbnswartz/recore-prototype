@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -12,8 +13,10 @@ namespace recore.web.Controllers
     public class DataController : Controller
     {
         private string connectionString;
-        public DataController(IConfiguration config){
+        private IDataService service;
+        public DataController(IConfiguration config, IDataService service){
             connectionString = config.GetValue<string>("recore:connectionstring");
+            this.service = service;
         }
         public IActionResult Index()
         {
@@ -24,9 +27,6 @@ namespace recore.web.Controllers
         [Route("data/{recordType}/")]
         public List<Record> GetAll(string recordType, List<string> columns)
         {
-            IDataSource data = new Postgres(connectionString);
-            DataService service = new DataService();
-            service.data = data;
             if (columns.Count == 0)
             {
                 RetrieveRecordTypeCommand retrieveCommand = new RetrieveRecordTypeCommand()
@@ -55,9 +55,6 @@ namespace recore.web.Controllers
             {
                 columns = columns[0].Split(",").ToList();
             }
-            IDataSource data = new Postgres(connectionString);
-            DataService service = new DataService();
-            service.data = data;
             if (columns.Count == 0)
             {
                 RetrieveRecordTypeCommand retrieveCommand = new RetrieveRecordTypeCommand()
@@ -83,9 +80,6 @@ namespace recore.web.Controllers
         [Route("data/{recordType}/")]
         public Guid Post(string recordType, [FromBody] Record record)
         {
-            IDataSource data = new Postgres(connectionString);
-            DataService service = new DataService();
-            service.data = data;
             record.Type = recordType;
             CreateRecordCommand command = new CreateRecordCommand()
             {
@@ -99,9 +93,6 @@ namespace recore.web.Controllers
         [Route("data/{recordType}/{id}")]
         public void Delete(string recordType, Guid id)
         {
-            IDataSource data = new Postgres(connectionString);
-            DataService service = new DataService();
-            service.data = data;
             DeleteRecordCommand command = new DeleteRecordCommand()
             {
                 Type = recordType,
@@ -114,9 +105,6 @@ namespace recore.web.Controllers
         [Route("data/{recordType}/{id}")]
         public void Update(string recordType, Guid id, [FromBody] Record record)
         {
-            IDataSource data = new Postgres(connectionString);
-            DataService service = new DataService();
-            service.data = data;
             record.Id = id;
             record.Type = recordType;
             UpdateRecordCommand command = new UpdateRecordCommand()
@@ -125,5 +113,13 @@ namespace recore.web.Controllers
             };
             UpdateRecordResult result = (UpdateRecordResult)service.Execute(command);
         }
+        
+        /*
+        private object ConvertJSONElement(JsonElement element)
+        {
+            if ()
+        }
+        */
+
     }
 }

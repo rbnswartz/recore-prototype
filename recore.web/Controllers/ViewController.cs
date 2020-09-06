@@ -22,10 +22,7 @@ namespace recore.web.Controllers
         [Route("View/{viewId}")]
         public IActionResult ShowView(Guid viewId)
         {
-            DataService service = new DataService()
-            {
-                data = new Postgres(connectionString),
-            };
+            DataService service = new DataService(new Postgres(connectionString));
             ViewData["sitemap"] = service.GetSiteMap();
             RecoreView view = service.GetView(viewId);
             ViewData["defaultForm"] = service.GetDefaultForm(view.recordType).FormId;

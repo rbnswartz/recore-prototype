@@ -28,10 +28,7 @@ namespace recore.web.Controllers
         [Route("metadata/recordtype/{entityName}/fields")]
         public Dictionary<string,RecordFieldMetadata> GetFields(string entityName)
         {
-            DataService service = new DataService()
-            {
-                data = new Postgres(connectionString),
-            };
+            DataService service = new DataService(new Postgres(connectionString));
             RetrieveRecordTypeCommand command = new RetrieveRecordTypeCommand()
             {
                 RecordType = entityName,
@@ -49,10 +46,7 @@ namespace recore.web.Controllers
         [Route("metadata/recordtype/{entityName}/fields/{fieldName}")]
         public bool AddFieldToRecordType(string entityName,string fieldName, [FromBody]RecordFieldMetadata field)
         {
-            DataService service = new DataService()
-            {
-                data = new Postgres(connectionString),
-            };
+            DataService service = new DataService(new Postgres(connectionString));
 
             IFieldType createdField = DeserializeFieldMetadata(field);
             createdField.Name = fieldName;
@@ -71,10 +65,7 @@ namespace recore.web.Controllers
         [Route("metadata/recordtype/{entityName}/fields/{fieldName}")]
         public bool RemoveFieldFromRecordType(string entityName,string fieldName)
         {
-            DataService service = new DataService()
-            {
-                data = new Postgres(connectionString),
-            };
+            DataService service = new DataService(new Postgres(connectionString));
 
             RemoveFieldFromRecordTypeCommand command = new RemoveFieldFromRecordTypeCommand()
             {
@@ -90,10 +81,7 @@ namespace recore.web.Controllers
         [Route("metadata/recordtype/{entityName}")]
         public bool DeleteRecordType(string entityName)
         {
-            DataService service = new DataService()
-            {
-                data = new Postgres(connectionString),
-            };
+            DataService service = new DataService(new Postgres(connectionString));
 
 
             var command = new DeleteRecordTypeCommand()
@@ -109,10 +97,7 @@ namespace recore.web.Controllers
         [Route("metadata/recordtype/{entityName}")]
         public bool CreateRecordType(string entityName, [FromBody] RecordMetadata recordType)
         {
-            DataService service = new DataService()
-            {
-                data = new Postgres(connectionString),
-            };
+            DataService service = new DataService(new Postgres(connectionString));
 
             RecordType createdType = new RecordType(recordType.Name, recordType.Name);
             foreach(var field in recordType.Fields)
@@ -135,10 +120,7 @@ namespace recore.web.Controllers
         [Route("metadata/recordtype/")]
         public List<RecordMetadata> GetRecordTypes(string entityName)
         {
-            DataService service = new DataService()
-            {
-                data = new Postgres(connectionString),
-            };
+            DataService service = new DataService(new Postgres(connectionString));
             var command = new RetrieveAllRecordTypesCommand();
             var result = (RetrieveAllRecordTypesResult)service.Execute(command);
             var output = new List<RecordMetadata>(result.RecordTypes.Count);
@@ -160,10 +142,7 @@ namespace recore.web.Controllers
         [Route("metadata/metadatadump")]
         public List<RecordMetadata> MetadataDump()
         {
-            DataService service = new DataService()
-            {
-                data = new Postgres(connectionString),
-            };
+            DataService service = new DataService(new Postgres(connectionString));
             var command = new RetrieveAllRecordTypesCommand();
             var result = (RetrieveAllRecordTypesResult)service.Execute(command);
             var output = new List<RecordMetadata>(result.RecordTypes.Count);

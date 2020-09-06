@@ -21,10 +21,7 @@ namespace recore.web.Controllers
         [Route("Form/{formId}/{recordId?}")]
         public IActionResult ShowForm(Guid formId, Guid recordId)
         {
-            DataService service = new DataService()
-            {
-                data = new Postgres(connectionString),
-            };
+            DataService service = new DataService(new Postgres(connectionString));
             ViewData["id"] = recordId == Guid.Empty ? "" : recordId.ToString();
             ViewData["sitemap"] = service.GetSiteMap();
             ViewData["form"] = service.GetForm(formId);

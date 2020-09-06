@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using recore.db;
 using recore.db.Commands;
 using recore.db.FieldTypes;
+using recore.web.Authentication;
 using recore.web.Extension;
 using recore.web.Models;
 
@@ -27,10 +28,7 @@ namespace recore.web.Controllers
 
         public IActionResult Metadata()
         {
-            DataService service = new DataService()
-            {
-                data = new Postgres(connectionString),
-            };
+            DataService service = new DataService(new Postgres(connectionString));
             ViewData["sitemap"] = service.GetSiteMap();
             return View();
         }
@@ -40,10 +38,7 @@ namespace recore.web.Controllers
         public bool Init()
         {
             //TODO: Refactor this as it is getting really messy
-            DataService service = new DataService()
-            {
-                data = new Postgres(connectionString),
-            };
+            DataService service = new DataService(new Postgres(connectionString));
             if (!service.data.CheckInitialized())
             {
                 service.data.Initialize();
@@ -209,6 +204,7 @@ namespace recore.web.Controllers
 
             CreateFormComponents(service);
             CreateViewComponents(service);
+            InitializeRecoreAuthenticationHelper.Initialize(service);
 
             return true;
         }
@@ -257,7 +253,7 @@ namespace recore.web.Controllers
             service.Execute(new CreateRecordCommand() { Target = textField });
             service.Execute(new CreateRecordCommand() { Target = formLink });
         }
-        void CreateFormComponents(DataService service)
+        void CreateFormComponents(IDataService service)
         {
             Record textField = new Record("formcomponent")
             {

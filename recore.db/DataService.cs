@@ -7,14 +7,18 @@ using recore.db.Query;
 
 namespace recore.db
 {
-    public class DataService
+    public class DataService : IDataService
     {
         public IDataSource data;
+        public DataService(IDataSource dataSource)
+        {
+            data = dataSource;
+        }
         public ResultBase Execute(CommandBase command)
         {
             data.Open();
             ResultBase output = null;
-            
+
             switch (command)
             {
                 case CreateRecordCommand _:
@@ -84,7 +88,7 @@ namespace recore.db
                         {
                             Columns = EnsureIdColumn(retreiveCommand.Columns, retreiveCommand.RecordType),
                             RecordType = retreiveCommand.RecordType,
-                            
+
                         };
                         var result = this.data.Query(query);
                         output = new RetrieveAllResult() { Result = result };

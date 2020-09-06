@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "recore.db", "recore.db\reco
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "recore.web", "recore.web\recore.web.csproj", "{402E265F-8462-4D13-A563-E5A518680F8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "recore.config.packager", "recore.config.packager\recore.config.packager.csproj", "{796F2D93-3C82-4176-8508-B088117970D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "recore.config.packager", "recore.config.packager\recore.config.packager.csproj", "{796F2D93-3C82-4176-8508-B088117970D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "recore.workflow", "recore.workflow\recore.workflow.csproj", "{0FEE093B-0B3D-4683-A175-75D813E8E8F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{796F2D93-3C82-4176-8508-B088117970D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{796F2D93-3C82-4176-8508-B088117970D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{796F2D93-3C82-4176-8508-B088117970D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FEE093B-0B3D-4683-A175-75D813E8E8F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FEE093B-0B3D-4683-A175-75D813E8E8F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FEE093B-0B3D-4683-A175-75D813E8E8F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FEE093B-0B3D-4683-A175-75D813E8E8F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

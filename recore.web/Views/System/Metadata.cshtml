@@ -162,12 +162,12 @@
                 switch (this.newFieldType) {
                     case "TextField":
                         fieldToCreate.metadata = {
-                            Length: this.newFieldLength,
+                            Length: this.newFieldLength.toString(),
                         };
                         break;
                     case "LookupField":
                         fieldToCreate.metadata = {
-                            Target: this.newFieldTarget,
+                            Target: this.newFieldTarget.toString(),
                         };
                         break;
                 }

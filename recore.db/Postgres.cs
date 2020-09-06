@@ -248,7 +248,7 @@ namespace recore.db
             List<string> fieldStrings = new List<string>();
             foreach (var field in fields)
             {
-                fieldStrings.Add(field.ToCreate());
+                fieldStrings.Add(GenerateFieldCreateSql(field));
             }
 
             return string.Join(",", fieldStrings);
@@ -271,7 +271,7 @@ namespace recore.db
                 case Guid _:
                     type = DbType.Guid;
                     break;
-                case Boolean _:
+                case bool _:
                     type = DbType.Boolean;
                     break;
                 case DateTime _:
@@ -420,17 +420,21 @@ namespace recore.db
             switch (field)
             {
                 case BooleanField _:
-                    return $"{field.Name} boolean {(!field.Nullable ? "not null" : "")}";
+                    return $"{field.Name} boolean{(!field.Nullable ? " not null" : "")}";
                 case NumberField _:
-                    return $"{field.Name} integer" + (!field.Nullable ? "NOT NULL" : "") ;
+                    return $"{field.Name} integer" + (!field.Nullable ? " NOT NULL" : "") ;
                 case PrimaryField _:
                     return $"{field.Name} uuid Not Null Primary Key";
-                case TextField _:
-                    TextField castedTextField = (TextField)field;
-                    return $"{castedTextField.Name} varchar({castedTextField.Length})" + (!castedTextField.Nullable ? "NOT NULL" : "") ;
-                case LookupField _:
-                    LookupField castedLookupField = (LookupField)field;
-                    return $"{field.Name} uuid references {castedLookupField.Target}({castedLookupField.Target}id) {(!field.Nullable ? "not null" : "")}";
+                case TextField textField:
+                    return $"{textField.Name} varchar({textField.Length})" + (!textField.Nullable ? " NOT NULL" : "") ;
+                case LookupField lookupField:
+                    return $"{field.Name} uuid references {lookupField.Target}({lookupField.Target}id) {(!field.Nullable ? " not null" : "")}";
+                case DateField dateField:
+                    return $"{dateField.Name} date" + (!dateField.Nullable ? " NOT NULL" : "") ;
+                case DateTimeField dateTimeField:
+                    return $"{dateTimeField.Name} timestamp {(dateTimeField.IncludeTimeZone ? "with time zone " : " ")}{(!dateTimeField.Nullable ? " NOT NULL" : "")}" ;
+                case GuidField _:
+                    return $"{field.Name} uuid{(!field.Nullable ? " not null" : "")}";
                 default:
                     throw new NotSupportedException($"Field type {field.GetType().Name} is unsupported by this backend");
             }
@@ -444,7 +448,7 @@ namespace recore.db
             };
             StringBuilder queryText = new StringBuilder();
             queryText.Append("select ");
-            queryText.AppendJoin(',', query.Columns);
+            queryText.Append(string.Join(",", query.Columns));
             queryText.Append($" from {query.RecordType}");
             if (query.Filters.Count != 0)
             {
@@ -491,7 +495,7 @@ namespace recore.db
             if(query.Orderings.Count != 0)
             {
                 var convertedOrders = query.Orderings.Select(i => $"{i.Column} {(i.Descending ? "desc" : "asc")}");
-                queryText.Append($" order by {(string.Join(',', convertedOrders))}");
+                queryText.Append($" order by {(string.Join(",", convertedOrders))}");
             }
             Console.WriteLine("Executing query " + queryText.ToString());
             command.CommandText = queryText.ToString();

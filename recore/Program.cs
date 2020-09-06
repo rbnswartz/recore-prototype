@@ -5,6 +5,9 @@ using recore.db.FieldTypes;
 using recore.db.Commands;
 using System.Linq;
 using recore.db.Query;
+using WorkflowCore.Services;
+using recore.workflow;
+using Microsoft.Extensions.Hosting;
 
 namespace recore
 {
@@ -13,8 +16,7 @@ namespace recore
         static void Main(string[] args)
         {
             IDataSource data = new Postgres("Host=localhost; Port=5432; User Id=reuben; Password=password; Database=recore;");
-            DataService service = new DataService();
-            service.data = data;
+            DataService service = new DataService(data);
             Console.WriteLine(data.CheckInitialized());
             if (!data.CheckInitialized())
             {
@@ -25,7 +27,7 @@ namespace recore
             service.Execute(new CreateRecordTypeCommand() { Target = CustomerType });
             RecordType logType = new RecordType("Log", "log");
             logType.Fields.Add(new TextField(){Name = "name", Length = 50, Nullable = true});
-            logType.Fields.Add(new NumberField(){Name = "number", Nullable = true});
+            logType.Fields.Add(new NumberField("number",true));
             service.Execute(new CreateRecordTypeCommand() {Target = logType});
             Record firstCustomer = new Record()
             {
@@ -81,10 +83,13 @@ namespace recore
             {
                 data.DeleteRecordType(type.RecordTypeId);
             }
-            
+
+            var persistance = new RecoreWorkflowPersistance(service);
             
             Console.WriteLine("All done");
             Console.ReadLine();
         }
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args);
     }
 }

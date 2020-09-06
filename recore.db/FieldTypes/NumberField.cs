@@ -15,5 +15,11 @@ namespace recore.db.FieldTypes
         public Type FieldType => typeof(int);
         public string Name { get; set; }
         public string Label { get; set; }
+
+        public NumberField(string name, bool nullable)
+        {
+            this.Name = name;
+            this.Nullable = nullable;
+        }
     }
 }

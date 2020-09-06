@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -13,17 +14,12 @@ namespace recore.web.Controllers
 {
     public class HomeController : Controller
     {
-        private string connectionString;
-        public HomeController(IConfiguration config){
-            connectionString = config.GetValue<string>("recore:connectionstring");
+        private IDataService service;
+        public HomeController(IConfiguration config, IDataService dataService){
+            service = dataService;
         }
         public IActionResult Index()
         {
-            DataService service = new DataService()
-            {
-                data = new Postgres(connectionString),
-            };
-
             ViewData["sitemap"] = service.GetSiteMap();
             return View();
         }
